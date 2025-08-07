@@ -24,6 +24,10 @@ import PrivacyPolicy from '../screen/Profile/PrivacyPolicy';
 import TermsConditions from '../screen/Profile/TermsConditions'
 //Profile screen ends
 
+//Home screen starts
+import Home from '../screen/Home/Home';
+//Home screen ends
+
 const Stack = createStackNavigator();
 
 const AppRouter = () => (
@@ -53,6 +57,10 @@ const AppRouter = () => (
       <Stack.Screen name="TermsConditions" component={TermsConditions} />
       
       {/* Profile Screen ends */}
+
+      {/* Home screen starts */}
+      <Stack.Screen name="Home" component={Home} />
+      {/* Home screen ends */}
       
     </Stack.Navigator>
   </NavigationContainer>
