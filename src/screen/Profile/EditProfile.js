@@ -101,12 +101,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 //   profileCircleBg: {
-//     width: 240,
-//     height: 240,
-//     borderRadius: 120,
+//     width: 220,
+//     height: 220,
+//     borderRadius: 110,
 //     backgroundColor: '#fafafa',
 //     alignItems: 'center',
 //     justifyContent: 'center',
+//     marginBottom: 0,
 //   },
   avatarWrapper: {
     width: 120,
