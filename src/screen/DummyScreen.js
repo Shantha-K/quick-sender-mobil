@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const DummyScreen = () => (
   <View style={styles.container}>
-    <Text>This is a dummy screen.</Text>
+    <Text>This is a Ashok screen.</Text>
   </View>
 );
 
