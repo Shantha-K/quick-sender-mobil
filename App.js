@@ -1,30 +1,16 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import React from 'react';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import Router from './src/router/index';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
+
+const App = () => {
+ 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NewAppScreen templateFileName="App.js" />
-    </View>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <Router />
+    </GestureHandlerRootView>
   );
-
-  ///Ashokkkkkkk
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
+};
 export default App;
