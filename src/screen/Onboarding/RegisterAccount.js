@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-
+import { API_URL } from '../../service';
 const RegisterAccount = (props) => {
   const { navigation, route } = props;
   const [countryCode, setCountryCode] = useState('+91');
@@ -72,7 +71,7 @@ const RegisterAccount = (props) => {
         body: formdata,
         redirect: 'follow',
       };
-      const response = await fetch('http://13.126.81.242:3000/api/auth/register', requestOptions);
+      const response = await fetch(API_URL+'api/auth/register', requestOptions);
       const result = await response.json();
       if (response.ok) {
         setModalVisible(true);
