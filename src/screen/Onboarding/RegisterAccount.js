@@ -3,24 +3,65 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, Pres
 
 const RegisterAccount = (props) => {
   const { navigation, route } = props;
-  const mobile = props.mobile || (route && route.params && route.params.mobile) || '';
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobile, setMobile] = useState(props.mobile || (route && route.params && route.params.mobile) || '');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [dob, setDob] = useState('');
+
+
+  const [address, setAddress] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [focusedInput, setFocusedInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const isValid = name && email && dob;
+  const isValid = name && email && dob && address;
 
-  const handleSubmit = () => {
-    setModalVisible(true);
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+      myHeaders.append('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0YTUxODc4OWQzYWU4ZThhZGUzNGIiLCJtb2JpbGUiOiI5MTk4NzY1NDMyMTEiLCJpYXQiOjE3NTQ2MzY4MjIsImV4cCI6MTc1NTI0MTYyMn0.H0sZDz3Ls7mhVY_QgiS7AQK0j3SURYKjMl-E0nY91W4');
+      const raw = JSON.stringify({
+        name,
+        email,
+        mobile: mobile.replace(/\D/g, ''),
+        dob,
+        address
+      });
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow',
+      };
+      const response = await fetch('http://13.126.81.242:3000/api/auth/register', requestOptions);
+      const result = await response.json();
+      if (response.ok) {
+        setModalVisible(true);
+      } else {
+        setError(result?.message || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDone = () => {
     setModalVisible(false);
+    // Always go to Home screen after registration
     if (navigation && navigation.replace) {
-      navigation.replace('Profile'); // Change 'Profile' to your actual next screen if needed
+      navigation.replace('Home');
     } else if (navigation && navigation.navigate) {
-      navigation.navigate('Profile');
+      navigation.navigate('Home');
+    } else if (navigation && navigation.reset) {
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     }
   };
 
@@ -39,35 +80,95 @@ const RegisterAccount = (props) => {
         </TouchableOpacity>
       </View>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          focusedInput === 'name' && styles.inputFocused
+        ]}
         placeholder="Name"
         value={name}
         onChangeText={setName}
+        onFocus={() => setFocusedInput('name')}
+        onBlur={() => setFocusedInput('')}
       />
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          focusedInput === 'email' && styles.inputFocused
+        ]}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        onFocus={() => setFocusedInput('email')}
+        onBlur={() => setFocusedInput('')}
       />
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <TextInput
+          style={[
+            styles.input,
+            styles.inputMobile,
+            { width: 70, marginRight: 8, textAlign: 'center' },
+            focusedInput === 'countryCode' && styles.inputFocused
+          ]}
+          value={countryCode}
+          onChangeText={setCountryCode}
+          maxLength={4}
+          onFocus={() => setFocusedInput('countryCode')}
+          onBlur={() => setFocusedInput('')}
+        />
+        <TextInput
+          style={[
+            styles.input,
+            styles.inputMobile,
+            { flex: 1 },
+            focusedInput === 'mobile' && styles.inputFocused
+          ]}
+          placeholder="Phone Number"
+          value={mobile}
+          onChangeText={setMobile}
+          keyboardType="phone-pad"
+          maxLength={15}
+          onFocus={() => setFocusedInput('mobile')}
+          onBlur={() => setFocusedInput('')}
+        />
+      </View>
       <TextInput
-        style={[styles.input, styles.inputMobile]}
-        value={mobile}
-        editable={false}
-      />
-      <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          focusedInput === 'dob' && styles.inputFocused
+        ]}
         placeholder="DOB (DD/MM/YYYY)"
         value={dob}
         onChangeText={setDob}
+        onFocus={() => setFocusedInput('dob')}
+        onBlur={() => setFocusedInput('')}
       />
+
+      <TextInput
+        style={[
+          styles.input,
+          focusedInput === 'address' && styles.inputFocused
+        ]}
+        placeholder="Address"
+        value={address}
+        onChangeText={setAddress}
+        onFocus={() => setFocusedInput('address')}
+        onBlur={() => setFocusedInput('')}
+        multiline
+        numberOfLines={2}
+      />
+
+      {error ? (
+        <Text style={{ color: '#F87171', marginBottom: 8 }}>{error}</Text>
+      ) : null}
       <TouchableOpacity
-        style={[styles.submitBtn, !isValid && styles.submitBtnDisabled]}
-        disabled={!isValid}
+        style={[styles.submitBtn, (!isValid || loading) && styles.submitBtnDisabled]}
+        disabled={!isValid || loading}
         onPress={handleSubmit}
       >
-        <Text style={[styles.submitText, !isValid && styles.submitTextDisabled]}>Submit</Text>
+        <Text style={[styles.submitText, (!isValid || loading) && styles.submitTextDisabled]}>
+          {loading ? 'Submitting...' : 'Submit'}
+        </Text>
       </TouchableOpacity>
       {/* Success Modal */}
       <Modal
@@ -169,6 +270,13 @@ const styles = StyleSheet.create({
     color: '#222',
     backgroundColor: '#F3F4F6',
     borderColor: '#22C55E',
+  },
+  inputFocused: {
+    borderColor: '#22C55E',
+    shadowColor: '#22C55E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   submitBtn: {
     backgroundColor: '#22C55E',
