@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const Parcels = () => {
+
+  const navigation = useNavigation();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
@@ -24,10 +28,12 @@ const Parcels = () => {
             />
           </TouchableOpacity>
         </View>
+        <TouchableOpacity onPress={ ()=> navigation.navigate('Profile') } >
         <Image
           source={require('../../assets/DashBoard/profile.png')}
           style={styles.profileImg}
         />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>

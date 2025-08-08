@@ -15,7 +15,7 @@ const Profile = () => {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.headerRow}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={arrowImg} style={styles.arrowIcon} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
