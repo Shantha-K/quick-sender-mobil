@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Parcels from './Parcels';
 import Sender from './Sender';
@@ -28,12 +28,29 @@ const NAV_ITEMS = [
   },
 ];
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation ,route}) => {
+    
+    const { name, email ,_id} = route.params || {};
+    console.log('name',name,email,_id)
   const [activeTab, setActiveTab] = useState('parcels');
+  useEffect(() => {
+    if (route && route.params && route.params.tab) {
+      setActiveTab(route.params.tab);
+    }
+  }, [route && route.params && route.params.tab]);
+ 
   return (
     <View style={styles.container}>
       <View style={{ flex: 1 }}>
-        {activeTab === 'parcels' && <Parcels navigation={navigation} />}
+        {activeTab === 'parcels' && (
+  <Parcels
+    navigation={navigation}
+    name={name}
+    email={email}
+    _id={_id}  // Pass user ID to Parcels component
+  />
+)}
+
         {activeTab === 'sender' && <Sender navigation={navigation} />}
         {activeTab === 'partner' && <Partner navigation={navigation} />}
         {activeTab === 'calculator' && <Calculator navigation={navigation} />}
