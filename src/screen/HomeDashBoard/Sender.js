@@ -1,4 +1,3 @@
-
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 
 const steps = [
@@ -9,13 +8,13 @@ const steps = [
 ];
 
 const Sender = ({ navigation }) => (
-  <ScrollView style={{ flex: 1, backgroundColor: '#fff' }} contentContainerStyle={{ paddingBottom: 32 }}>
-    <View style={{ paddingHorizontal: 24, paddingTop: 32 }}>
-      <Text style={styles.header}>Send Parcel</Text>
-      <Text style={styles.subHeader}>Just a few steps to send parcel anywhere you want</Text>
+  <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
+    <View style={styles.innerContainer}>
+      <Text style={styles.title}>Send Parcel</Text>
+      <Text style={styles.subtitle}>Just a few steps to send parcel anywhere you want</Text>
 
       <View style={styles.card}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={styles.cardRow}>
           <Image source={require('../../assets/DashBoard/Group.png')} style={styles.cardIcon} />
           <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>Send Parcels</Text>
@@ -27,16 +26,18 @@ const Sender = ({ navigation }) => (
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.stepsHeader}>Steps to work as a delivery partner</Text>
-      <View style={{ marginTop: 16 }}>
+      <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
+      <View style={styles.stepsWrapper}>
         {steps.map((step, idx) => (
-          <View key={step.key} style={styles.stepRow}>
-            <Image source={step.icon} style={styles.stepIcon} />
-            <View style={{ flex: 1 }}>
+          <View key={step.key} style={styles.stepItem}>
+            <View style={styles.stepIconWrapper}>
+              <Image source={step.icon} style={styles.stepIcon} />
+              {idx < steps.length - 1 && <View style={styles.stepLine} />}
+            </View>
+            <View style={styles.stepTextWrapper}>
               <Text style={styles.stepNum}>Step {step.key}</Text>
               <Text style={styles.stepLabel}>{step.label}</Text>
             </View>
-            {idx < steps.length - 1 && <View style={styles.stepLine} />}
           </View>
         ))}
       </View>
@@ -45,95 +46,129 @@ const Sender = ({ navigation }) => (
 );
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 25,
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  innerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 32,
+  },
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 8,
-    marginTop: 8,
+    marginBottom: 4,
+    marginLeft: 4,
   },
-  subHeader: {
-    fontSize: 16,
-    color: '#bdbdbd',
+  subtitle: {
+    fontSize: 13,
+    color: '#888',
     marginBottom: 24,
+    marginLeft: 4,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 32,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   cardIcon: {
     width: 48,
     height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFF7E6',
     marginRight: 16,
     resizeMode: 'contain',
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   cardDesc: {
-    fontSize: 14,
-    color: '#bdbdbd',
-    marginBottom: 12,
+    fontSize: 13,
+    color: '#888',
   },
   sendBtn: {
-    backgroundColor: '#00C37A',
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: '#22C55E',
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   sendBtnText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
   },
-  stepsHeader: {
-    fontSize: 20,
+  stepsTitle: {
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 8,
+    marginBottom: 16,
+    marginLeft: 4,
   },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  stepsWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
     marginBottom: 24,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start', // Align to top for line positioning
+    marginBottom: 32,
+  },
+  stepIconWrapper: {
+    width: 32,
+    alignItems: 'center',
+    marginRight: 16,
     position: 'relative',
   },
   stepIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 16,
+    width: 32,
+    height: 32,
     resizeMode: 'contain',
-  },
-  stepNum: {
-    color: '#F15B5D',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  stepLabel: {
-    fontSize: 16,
-    color: '#222',
-    fontWeight: '500',
+    tintColor: '#BDBDBD',
   },
   stepLine: {
     position: 'absolute',
-    left: 20,
-    top: 40,
+    top: 32,  // directly below icon
     width: 2,
-    height: 32,
-    backgroundColor: '#e0e0e0',
-    zIndex: -1,
+    height: 24,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 1,
+  },
+  stepTextWrapper: {
+    flex: 1,
+  },
+  stepNum: {
+    fontSize: 13,
+    color: '#F87171',
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  stepLabel: {
+    fontSize: 15,
+    color: '#222',
+    fontWeight: '500',
+    marginBottom: 0,
   },
 });
 
