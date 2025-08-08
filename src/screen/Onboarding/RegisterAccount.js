@@ -3,7 +3,7 @@ import { Platform, Alert } from 'react-native';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
 import { API_URL } from '../../service';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import { launchImageLibrary } from 'react-native-image-picker';
 const RegisterAccount = (props) => {
   const { navigation, route } = props;
   const [countryCode, setCountryCode] = useState('+91');
@@ -23,6 +23,7 @@ const RegisterAccount = (props) => {
   const [focusedInput, setFocusedInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+const [registeredUser, setRegisteredUser] = useState(null); // 🆕 add this at the top
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailValid = email.length === 0 || emailRegex.test(email);
@@ -76,6 +77,8 @@ const RegisterAccount = (props) => {
       const response = await fetch(API_URL+'api/auth/register', requestOptions);
       const result = await response.json();
       if (response.ok) {
+          setRegisteredUser(result.data); // 🆕 store user data
+
         setModalVisible(true);
         console.log('Registration successful:', result);
       } else {
@@ -101,17 +104,38 @@ const RegisterAccount = (props) => {
     }
   };
 
-  const handleDone = () => {
-    setModalVisible(false);
-    // Always go to Home screen after registration
-    if (navigation && navigation.replace) {
-      navigation.replace('Home');
-    } else if (navigation && navigation.navigate) {
-      navigation.navigate('Home');
-    } else if (navigation && navigation.reset) {
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
-    }
-  };
+ const handleDone = () => {
+  setModalVisible(false);
+
+  const { name, email,_id } = registeredUser || {}; // ✅ pull from state
+
+  if (navigation && navigation.replace) {
+    navigation.replace('Home', { name, email,_id });
+  } else if (navigation && navigation.navigate) {
+    navigation.navigate('Home', { name, email,_id });
+  } else if (navigation && navigation.reset) {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home', params: { name, email,_id} }],
+    });
+  }
+};
+
+
+  // const handleDone = () => {
+  //   setModalVisible(false);
+  //   // Always go to Home screen after registration
+  //   if (navigation && navigation.replace) {
+  //     navigation.replace('Home',{
+  //       name:data.name
+
+  //     });
+  //   } else if (navigation && navigation.navigate) {
+  //     navigation.navigate('Home');
+  //   } else if (navigation && navigation.reset) {
+  //     navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+  //   }
+  // };
 
   return (
     <View style={styles.container}>

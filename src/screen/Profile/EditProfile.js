@@ -1,17 +1,47 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL } from '../../service';
 const profileImg = require('../../assets/Profile/Profile.png');
 const editImg = require('../../assets/Profile/Edit.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
 
-const EditProfile = () => {
+const EditProfile = ({route}) => {
+        const { _id } = route.params || {};
+
   const navigation = useNavigation();
+console.log('userid12',_id)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('+91 - 9876543210');
+  const [phone, setPhone] = useState('');
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
+
+  React.useEffect(() => {
+    // Replace with your actual user id or fetch from AsyncStorage if needed
+    const userId = _id;
+    console.log('userid',userId)
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
+    const requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow"
+    };
+    fetch(API_URL + "api/auth/getregistered/" + userId, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        const data = result.data || {};
+        setName(data.name || '');
+        setEmail(data.email || '');
+        setPhone(data.mobile || '');
+        setDob(data.dob || '');
+        setAddress(data.address || '');
+        console.log('Profile fetched:', data);
+      })
+      .catch((error) => console.error('Error fetching profile:', error));
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerRow}>

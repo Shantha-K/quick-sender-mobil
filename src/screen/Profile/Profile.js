@@ -8,8 +8,10 @@ const editImg = require('../../assets/Profile/Edit.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
 
 
-const Profile = () => {
+const Profile = ({route}) => {
   const navigation = useNavigation();
+    const { name, email,_id } = route.params || {};
+console.log('id',_id)
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -30,13 +32,16 @@ const Profile = () => {
               <Image source={editImg} style={styles.editIcon} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>Johnson Smith</Text>
-          <Text style={styles.email}>johnson@gmail.com</Text>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.email}>{email}</Text>
+          
         </View>
 
         {/* Menu List */}
         <View style={styles.menuList}>
-          <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
+
+          
+          <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile',{_id})} />
           <MenuItem label="KYC Details" right={<Text style={styles.verify}>Verify</Text>} onPress={() => navigation.navigate('KycDetails')} />
           <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
           <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />

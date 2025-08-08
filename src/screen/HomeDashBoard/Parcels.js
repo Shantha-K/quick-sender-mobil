@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const Parcels = () => {
+const Parcels = ({  name, email ,_id}) => {
 
   const navigation = useNavigation();
 
@@ -11,6 +11,8 @@ const Parcels = () => {
   return (
     <View style={styles.container}>
       {/* Header Section */}
+
+
       <View style={styles.headerBg}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={styles.headerTitle}>Track parcel</Text>
@@ -28,7 +30,7 @@ const Parcels = () => {
             />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={ ()=> navigation.navigate('Profile') } >
+<TouchableOpacity onPress={() => navigation.navigate('Profile', { name, email,_id })}>
         <Image
           source={require('../../assets/DashBoard/profile.png')}
           style={styles.profileImg}
