@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { Platform, Alert } from 'react-native';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
 import { API_URL } from '../../service';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 const RegisterAccount = (props) => {
   const { navigation, route } = props;
   const [countryCode, setCountryCode] = useState('+91');
@@ -8,42 +11,87 @@ const RegisterAccount = (props) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [dob, setDob] = useState('');
+  const [dobDate, setDobDate] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
 
   const [address, setAddress] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  // Image picker handler
+ 
   const [modalVisible, setModalVisible] = useState(false);
   const [focusedInput, setFocusedInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const isValid = name && email && dob && address;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = email.length === 0 || emailRegex.test(email);
+  const isValid = name && email && dob && address && isEmailValid;
 
+   const handlePickImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        maxWidth: 512,
+        maxHeight: 512,
+        quality: 0.7,
+      },
+      (response) => {
+        if (response.didCancel) return;
+        if (response.errorCode) {
+          Alert.alert('Image Picker Error', response.errorMessage || 'Unknown error');
+          return;
+        }
+        if (response.assets && response.assets.length > 0) {
+          setProfileImage(response.assets[0]);
+        }
+      }
+    );
+  };
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
     try {
       const myHeaders = new Headers();
-      myHeaders.append('Content-Type', 'application/json');
       myHeaders.append('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0YTUxODc4OWQzYWU4ZThhZGUzNGIiLCJtb2JpbGUiOiI5MTk4NzY1NDMyMTEiLCJpYXQiOjE3NTQ2MzY4MjIsImV4cCI6MTc1NTI0MTYyMn0.H0sZDz3Ls7mhVY_QgiS7AQK0j3SURYKjMl-E0nY91W4');
-      const raw = JSON.stringify({
-        name,
-        email,
-        mobile: mobile.replace(/\D/g, ''),
-        dob,
-        address
-      });
+      const formdata = new FormData();
+      formdata.append('name', name);
+      formdata.append('email', email);
+      formdata.append('mobile', mobile.replace(/\D/g, ''));
+      formdata.append('dob', dob);
+      formdata.append('address', address);
+      if (profileImage) {
+        formdata.append('profileImage', {
+          uri: profileImage.uri,
+          name: profileImage.fileName || 'profile.jpg',
+          type: profileImage.mimeType || 'image/jpeg',
+        });
+      }
       const requestOptions = {
         method: 'POST',
         headers: myHeaders,
-        body: raw,
+        body: formdata,
         redirect: 'follow',
       };
       const response = await fetch(API_URL+'api/auth/register', requestOptions);
       const result = await response.json();
       if (response.ok) {
         setModalVisible(true);
+        console.log('Registration successful:', result);
       } else {
-        setError(result?.message || 'Registration failed');
+        // If account already exists, navigate to Home
+        if (result?.message && result.message.toLowerCase().includes('already')) {
+          if (navigation && navigation.replace) {
+            navigation.replace('Home');
+          } else if (navigation && navigation.navigate) {
+            navigation.navigate('Home');
+          } else if (navigation && navigation.reset) {
+            navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+          }
+        } else {
+          setError(result?.message || 'Registration failed');
+          console.error('Registration error:', result);
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -73,10 +121,14 @@ const RegisterAccount = (props) => {
       <Text style={styles.header}>Register Account</Text>
       <View style={styles.avatarWrapper}>
         <View style={styles.avatarCircle}>
-          {/* <Image source={require('../../assets/Onboarding/avatar.png')} style={styles.avatarImg} /> */}
+          {profileImage ? (
+            <Image source={{ uri: profileImage.uri }} style={styles.avatarImg}  />
+          ) : (
+            <Image source={require('../../assets/Profile/Profile.png')} style={styles.avatarImg} />
+          )}
         </View>
-        <TouchableOpacity style={styles.editBtn}>
-          {/* <Image source={require('../../assets/Onboarding/edit.png')} style={styles.editIcon} /> */}
+        <TouchableOpacity style={styles.editBtn} onPress={handlePickImage}>
+          <Image source={require('../../assets/Profile/Edit.png')} style={styles.editIcon} />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -93,7 +145,8 @@ const RegisterAccount = (props) => {
       <TextInput
         style={[
           styles.input,
-          focusedInput === 'email' && styles.inputFocused
+          focusedInput === 'email' && styles.inputFocused,
+          !isEmailValid && { borderColor: '#F87171' }
         ]}
         placeholder="Email"
         value={email}
@@ -101,7 +154,11 @@ const RegisterAccount = (props) => {
         keyboardType="email-address"
         onFocus={() => setFocusedInput('email')}
         onBlur={() => setFocusedInput('')}
+        autoCapitalize="none"
       />
+      {!isEmailValid && (
+        <Text style={{ color: '#F87171', marginBottom: 8, marginLeft: 4 }}>Enter a valid email address</Text>
+      )}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
         <TextInput
           style={[
@@ -132,17 +189,43 @@ const RegisterAccount = (props) => {
           onBlur={() => setFocusedInput('')}
         />
       </View>
-      <TextInput
+
+      <TouchableOpacity
+        activeOpacity={0.8}
         style={[
           styles.input,
-          focusedInput === 'dob' && styles.inputFocused
+          focusedInput === 'dob' && styles.inputFocused,
+          { justifyContent: 'center' }
         ]}
-        placeholder="DOB (DD/MM/YYYY)"
-        value={dob}
-        onChangeText={setDob}
-        onFocus={() => setFocusedInput('dob')}
+        onPress={() => {
+          setShowDatePicker(true);
+          setFocusedInput('dob');
+        }}
         onBlur={() => setFocusedInput('')}
-      />
+      >
+        <Text style={{ color: dob ? '#222' : '#888', fontSize: 16 }}>
+          {dob ? dob : 'DOB (DD/MM/YYYY)'}
+        </Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={dobDate || new Date(2000, 0, 1)}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          maximumDate={new Date()}
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              const d = selectedDate;
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const year = d.getFullYear();
+              setDob(`${day}/${month}/${year}`);
+              setDobDate(selectedDate);
+            }
+          }}
+        />
+      )}
 
       <TextInput
         style={[
@@ -237,8 +320,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarImg: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 120,
   },
   editBtn: {
     position: 'absolute',
