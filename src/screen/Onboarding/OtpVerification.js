@@ -10,6 +10,7 @@ const OtpVerification = ({ navigation, route }) => {
   const [invalid, setInvalid] = useState(false);
   const [apiError, setApiError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [userExists, setUserExists] = useState(false);
  
   React.useEffect(() => {
     if (timer > 0) {
@@ -52,6 +53,9 @@ const OtpVerification = ({ navigation, route }) => {
         setModalVisible(true);
         setInvalid(false);
         setApiError('');
+
+        const isExistingUser = result.data && (result.data.name || result.data.email || result.data.dob);
+        setUserExists(!!isExistingUser)
         console.log('otpverify',result)
       } else {
         setInvalid(false);
@@ -136,11 +140,14 @@ const OtpVerification = ({ navigation, route }) => {
               style={styles.modalButton}
               onPress={() => {
                 setModalVisible(false);
-                if (navigation && navigation.replace) {
+
+                if(navigation){
+                  if (userExists) {
+                    navigation.replace('Home');
+                }else{
                   navigation.replace('RegisterAccount', { mobile });
-                } else if (navigation && navigation.navigate) {
-                  navigation.navigate('RegisterAccount', { mobile });
                 }
+              }
               }}
             >
               <Text style={styles.modalButtonText}>Done</Text>
