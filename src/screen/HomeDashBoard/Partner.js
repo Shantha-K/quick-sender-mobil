@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-const Partner = () => {
+const Partner = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Delivery partner</Text>
@@ -19,7 +19,7 @@ const Partner = () => {
             <Text style={styles.kycDesc}>Complete KYC to Deliver the parcels & earn money</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.kycBtn}>
+        <TouchableOpacity style={styles.kycBtn} onPress={() => navigation && navigation.navigate('KycDetails')}>
           <Text style={styles.kycBtnText}>Complete KYC</Text>
         </TouchableOpacity>
       </View>
