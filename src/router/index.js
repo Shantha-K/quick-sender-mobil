@@ -30,13 +30,14 @@ import Home from '../screen/HomeDashBoard/Home';
 import SenderForm from '../screen/HomeDashBoard/SenderForm';
 import ReceiverForm from '../screen/HomeDashBoard/ReceiverForm';
 import ParcelCategoryForm from '../screen/HomeDashBoard/ParcelCategoryForm';
+// import KycPending from '../screen/HomeDashBoard/KycPending';
 //Home screen ends
 
 const Stack = createStackNavigator();
 
 const AppRouter = () => (
   <NavigationContainer>
-    <Stack.Navigator initialRouteName='Splash' screenOptions={{ headerShown: false }}> 
+    <Stack.Navigator initialRouteName='Home' screenOptions={{ headerShown: false }}> 
 
       {/* Onboarding screens start */}
       <Stack.Screen name="Splash" component={Splash} />
@@ -67,6 +68,7 @@ const AppRouter = () => (
   <Stack.Screen name="SenderForm" component={SenderForm} />
   <Stack.Screen name="ReceiverForm" component={ReceiverForm} />
   <Stack.Screen name="ParcelCategoryForm" component={ParcelCategoryForm} />
+  {/* <Stack.Screen name="KycPending" component={KycPending} /> */}
       {/* Home screen ends */}
       
     </Stack.Navigator>
