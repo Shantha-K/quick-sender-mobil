@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PARCEL_CATEGORIES = [
   'Documents',
@@ -42,9 +43,18 @@ const ParcelCategoryForm = ({ navigation }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (validate()) {
-      navigation && navigation.navigate('SomeNextScreen');
+      const parcelData = {
+        productName: category,
+        weight,
+        length,
+        width,
+        height,
+        estimatedAmount: amount,
+      };
+      await AsyncStorage.setItem('parcelData', JSON.stringify(parcelData));
+      navigation.navigate('SummaryScreen');
     }
   };
 

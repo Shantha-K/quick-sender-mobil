@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ReceiverForm = ({ navigation }) => {
   const [receiverName, setReceiverName] = useState('');
@@ -51,6 +52,35 @@ const ReceiverForm = ({ navigation }) => {
     };
     fetchStates();
   }, []);
+
+  const handleNext = async () => {
+    const newErrors = {};
+    if (!receiverName.trim())
+      newErrors.receiverName = 'Receiver Name is required';
+    if (!receiverMobile.trim())
+      newErrors.receiverMobile = 'Receiver Mobile Number is required';
+    if (!receiverEmail.trim())
+      newErrors.receiverEmail = 'Receiver Email is required';
+    if (!receiverState.trim())
+      newErrors.receiverState = 'Receiver State is required';
+    if (!receiverCity.trim())
+      newErrors.receiverCity = 'Receiver City is required';
+    if (!receiverAddress.trim())
+      newErrors.receiverAddress = 'Receiver Address is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      const receiverData = {
+        name: receiverName,
+        email: receiverEmail,
+        phone: receiverMobile,
+        address: receiverAddress,
+        state: receiverState,
+        city: receiverCity,
+      };
+      await AsyncStorage.setItem('receiverData', JSON.stringify(receiverData));
+      navigation && navigation.navigate('ParcelCategoryForm');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -250,25 +280,7 @@ const ReceiverForm = ({ navigation }) => {
         <TouchableOpacity
           style={styles.nextBtn}
           activeOpacity={0.85}
-          onPress={() => {
-            const newErrors = {};
-            if (!receiverName.trim())
-              newErrors.receiverName = 'Receiver Name is required';
-            if (!receiverMobile.trim())
-              newErrors.receiverMobile = 'Receiver Mobile Number is required';
-            if (!receiverEmail.trim())
-              newErrors.receiverEmail = 'Receiver Email is required';
-            if (!receiverState.trim())
-              newErrors.receiverState = 'Receiver State is required';
-            if (!receiverCity.trim())
-              newErrors.receiverCity = 'Receiver City is required';
-            if (!receiverAddress.trim())
-              newErrors.receiverAddress = 'Receiver Address is required';
-            setErrors(newErrors);
-            if (Object.keys(newErrors).length === 0) {
-              navigation && navigation.navigate('ParcelCategoryForm');
-            }
-          }}
+          onPress={handleNext}
         >
           <Text style={styles.nextBtnText}>Next</Text>
         </TouchableOpacity>

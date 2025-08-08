@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SenderForm = ({ navigation }) => {
   const [senderName, setSenderName] = useState('');
@@ -51,6 +52,35 @@ const SenderForm = ({ navigation }) => {
     };
     fetchStates();
   }, []);
+
+  const handleNext = async () => {
+    const newErrors = {};
+    if (!senderName.trim())
+      newErrors.senderName = 'Sender Name is required';
+    if (!senderMobile.trim())
+      newErrors.senderMobile = 'Sender Mobile Number is required';
+    if (!senderEmail.trim())
+      newErrors.senderEmail = 'Sender Email is required';
+    if (!senderState.trim())
+      newErrors.senderState = 'Sender State is required';
+    if (!senderCity.trim())
+      newErrors.senderCity = 'Sender City is required';
+    if (!senderAddress.trim())
+      newErrors.senderAddress = 'Sender Address is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      const senderData = {
+        name: senderName,
+        email: senderEmail,
+        phone: senderMobile,
+        address: senderAddress,
+        state: senderState,
+        city: senderCity,
+      };
+      await AsyncStorage.setItem('senderData', JSON.stringify(senderData));
+      navigation && navigation.navigate('ReceiverForm');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -346,25 +376,7 @@ const SenderForm = ({ navigation }) => {
         <TouchableOpacity
           style={styles.nextBtn}
           activeOpacity={0.85}
-          onPress={() => {
-            const newErrors = {};
-            if (!senderName.trim())
-              newErrors.senderName = 'Sender Name is required';
-            if (!senderMobile.trim())
-              newErrors.senderMobile = 'Sender Mobile Number is required';
-            if (!senderEmail.trim())
-              newErrors.senderEmail = 'Sender Email is required';
-            if (!senderState.trim())
-              newErrors.senderState = 'Sender State is required';
-            if (!senderCity.trim())
-              newErrors.senderCity = 'Sender City is required';
-            if (!senderAddress.trim())
-              newErrors.senderAddress = 'Sender Address is required';
-            setErrors(newErrors);
-            if (Object.keys(newErrors).length === 0) {
-              navigation && navigation.navigate('ReceiverForm');
-            }
-          }}
+          onPress={handleNext}
         >
           <Text style={styles.nextBtnText}>Next</Text>
         </TouchableOpacity>
