@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Platform, Alert } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
 import { API_URL } from '../../service';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 const RegisterAccount = (props) => {
   const { navigation, route } = props;
   const [countryCode, setCountryCode] = useState('+91');
@@ -17,7 +18,17 @@ const RegisterAccount = (props) => {
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState(null);
   // Image picker handler
-  const handlePickImage = () => {
+ 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [focusedInput, setFocusedInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = email.length === 0 || emailRegex.test(email);
+  const isValid = name && email && dob && address && isEmailValid;
+
+   const handlePickImage = () => {
     launchImageLibrary(
       {
         mediaType: 'photo',
@@ -37,15 +48,6 @@ const RegisterAccount = (props) => {
       }
     );
   };
-  const [modalVisible, setModalVisible] = useState(false);
-  const [focusedInput, setFocusedInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = email.length === 0 || emailRegex.test(email);
-  const isValid = name && email && dob && address && isEmailValid;
-
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
