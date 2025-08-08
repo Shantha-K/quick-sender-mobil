@@ -1,71 +1,87 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import Parcels from './Parcels';
-import Sender from './Sender';
-import Partner from './Partner';
-import Calculator from './Calculator';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 
-const NAV_ITEMS = [
-  {
-    key: 'parcels',
-    label: 'Parcels',
-    img: require('../../assets/Navbar/parcel.png'),
-  },
-  {
-    key: 'sender',
-    label: 'Sender',
-    img: require('../../assets/Navbar/SendParcels.png'),
-  },
-  {
-    key: 'partner',
-    label: 'Partner',
-    img: require('../../assets/Navbar/icons.png'),
-  },
-  {
-    key: 'calculator',
-    label: 'Calculator',
-    img: require('../../assets/Navbar/calc.png'),
-  },
-];
+const Parcels = () => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-const Home = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState('parcels');
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1 }}>
-        {activeTab === 'parcels' && <Parcels navigation={navigation} />}
-        {activeTab === 'sender' && <Sender navigation={navigation} />}
-        {activeTab === 'partner' && <Partner navigation={navigation} />}
-        {activeTab === 'calculator' && <Calculator navigation={navigation} />}
-      </View>
-      {/* Bottom Navbar */}
-      <View style={styles.navbarWrapper}>
-        <View style={styles.navbar}>
-          {NAV_ITEMS.map(item => (
-            <View style={styles.navItem} key={item.key}>
-              <TouchableOpacity
-                style={styles.iconCircle}
-                onPress={() => setActiveTab(item.key)}
-                activeOpacity={0.7}
-              >
-                <Image
-                  source={item.img}
-                  style={styles.iconImg}
-                  tintColor={activeTab === item.key ? '#222' : '#bdbdbd'}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.label, activeTab === item.key && styles.activeLabel]}>{item.label}</Text>
-            </View>
-          ))}
+      {/* Header Section */}
+      <View style={styles.headerBg}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.headerTitle}>Track parcel</Text>
+          <TouchableOpacity
+            onPress={() => setDropdownOpen(!dropdownOpen)}
+            style={{ marginLeft: 8, marginTop: 4 }}
+          >
+            <Image
+              source={
+                dropdownOpen
+                  ? require('../../assets/DashBoard/Up.png')
+                  : require('../../assets/DashBoard/Down.png')
+              }
+              style={{ width: 18, height: 18, resizeMode: 'contain' }}
+            />
+          </TouchableOpacity>
         </View>
-        <View style={styles.navbarLine} />
+        <Image
+          source={require('../../assets/DashBoard/profile.png')}
+          style={styles.profileImg}
+        />
       </View>
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        {/* Dropdown Content */}
+        {dropdownOpen && (
+          <View style={styles.dropdownContent}>
+            <Text style={styles.dropdownLabel}>Enter parcel number</Text>
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputText}>Tracking Number</Text>
+            </View>
+            <TouchableOpacity style={styles.trackBtn} activeOpacity={0.8}>
+              <Text style={styles.trackBtnText}>Track parcel</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* My Parcels Title */}
+        <Text style={styles.sectionTitle}>My parcels</Text>
+
+        {/* Empty State Illustration */}
+        <View style={styles.illustrationWrapper}>
+          <Image
+            source={require('../../assets/DashBoard/Girl.png')}
+            style={styles.illustrationImg}
+          />
+          <Text style={styles.emptyText}>No parcels found!</Text>
+        </View>
+
+        {/* Action Cards */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.8}>
+            <Image
+              source={require('../../assets/DashBoard/Group.png')}
+              style={styles.actionIcon}
+            />
+            <Text style={styles.actionTitle}>Send Parcel</Text>
+            <Text style={styles.actionDesc}>Click here to send parcels to anyone to their door step</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.8}>
+            <Image
+              source={require('../../assets/DashBoard/BigBox.png')}
+              style={styles.actionIcon}
+            />
+            <Text style={styles.actionTitle}>Delivery Parcel</Text>
+            <Text style={styles.actionDesc}>Start your journey with us as a delivery partner</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+    container: {
     flex: 1,
     backgroundColor: '#fff',
     position: 'relative',
@@ -418,4 +434,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default Parcels;

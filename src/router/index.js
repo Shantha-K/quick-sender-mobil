@@ -24,15 +24,19 @@ import PrivacyPolicy from '../screen/Profile/PrivacyPolicy';
 import TermsConditions from '../screen/Profile/TermsConditions'
 //Profile screen ends
 
+
 //Home screen starts
-import Home from '../screen/Home/Home';
+import Home from '../screen/HomeDashBoard/Home';
+import SenderForm from '../screen/HomeDashBoard/SenderForm';
+import ReceiverForm from '../screen/HomeDashBoard/ReceiverForm';
+import ParcelCategoryForm from '../screen/HomeDashBoard/ParcelCategoryForm';
 //Home screen ends
 
 const Stack = createStackNavigator();
 
 const AppRouter = () => (
   <NavigationContainer>
-    <Stack.Navigator screenOptions={{ headerShown: false }}> 
+    <Stack.Navigator initialRouteName='Splash' screenOptions={{ headerShown: false }}> 
 
       {/* Onboarding screens start */}
       <Stack.Screen name="Splash" component={Splash} />
@@ -60,6 +64,9 @@ const AppRouter = () => (
 
       {/* Home screen starts */}
       <Stack.Screen name="Home" component={Home} />
+  <Stack.Screen name="SenderForm" component={SenderForm} />
+  <Stack.Screen name="ReceiverForm" component={ReceiverForm} />
+  <Stack.Screen name="ParcelCategoryForm" component={ParcelCategoryForm} />
       {/* Home screen ends */}
       
     </Stack.Navigator>

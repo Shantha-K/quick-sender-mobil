@@ -1,16 +1,56 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { API_URL } from '../../service';
 
-const Login = ({ onRequestOtp }) => {
+import { useNavigation } from '@react-navigation/native';
+
+const Login = () => {
+  const navigation = useNavigation();
   const [mobile, setMobile] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [success, setSuccess] = useState(false);
   const isInvalid = mobile.length > 0 && mobile.length < 10;
 
   const handleChange = (text) => {
-    // Only allow numbers, max 10 digits
     const cleaned = text.replace(/[^0-9]/g, '').slice(0, 10);
     setMobile(cleaned);
+    setApiError('');
+    setSuccess(false);
   };
+  
+const handleRequestOtp = async () => {
+  setApiError('');
+  setSuccess(false);
+  setLoading(true);
+  try {
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+  const raw = JSON.stringify({ mobile: mobile });
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    };
+    const response = await fetch(API_URL + 'api/auth/request-otp', requestOptions);
+    const result = await response.json();
+    console.log('API Result:', result); // Debug
+
+    if (result && result.success === true) {
+      navigation.navigate('OtpVerification', { mobile: mobile, otp1: result.data.otp });
+      console.log('OTP sent successfully:', result.data.otp);
+    } else {
+      setApiError(result?.message);
+    }
+  } catch (error) {
+    console.log('Request error:', error);
+    setApiError(error.message || 'Network error. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -38,12 +78,18 @@ const Login = ({ onRequestOtp }) => {
       {isInvalid && (
         <Text style={styles.errorText}>Invalid mobile Number</Text>
       )}
+      {apiError ? <Text style={styles.errorText}>{apiError}</Text> : null}
+      {success ? <Text style={{ color: '#22C55E', marginBottom: 8 }}>OTP sent successfully!</Text> : null}
       <TouchableOpacity
-        style={[styles.button, mobile.length !== 10 && styles.buttonDisabled]}
-        disabled={mobile.length !== 10}
-        onPress={() => onRequestOtp(mobile)}
+        style={[styles.button, (mobile.length !== 10 || loading) && styles.buttonDisabled]}
+        disabled={mobile.length !== 10 || loading}
+        onPress={handleRequestOtp}
       >
-        <Text style={[styles.buttonText, mobile.length !== 10 && styles.buttonTextDisabled]}>Request OTP</Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={[styles.buttonText, mobile.length !== 10 && styles.buttonTextDisabled]}>Request OTP</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Pressable, Image } from 'react-native';
-
-
-const OtpVerification = ({ mobile, onBack, navigation }) => {
+import { API_URL } from '../../service'; // Adjust the import based on your project structure
+ 
+ 
+const OtpVerification = ({ navigation, route }) => {
+  const { mobile, onBack, otp1 } = route?.params || {};
   const [otp, setOtp] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [invalid, setInvalid] = useState(false);
+  const [apiError, setApiError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-
+ 
   React.useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer(t => t - 1), 1000);
       return () => clearInterval(interval);
     }
   }, [timer]);
-
+ 
   const handleChange = (text, idx) => {
     if (/^[0-9]?$/.test(text)) {
       const newOtp = [...otp];
@@ -23,28 +26,62 @@ const OtpVerification = ({ mobile, onBack, navigation }) => {
       setInvalid(false);
     }
   };
-
+ 
   const isValid = otp.every(d => d.length === 1);
-
-  const handleVerify = () => {
-    // Simulate success for demo
-    setModalVisible(true);
+ 
+  const handleVerify = async () => {
+    const enteredOtp = otp.join('');
+    setInvalid(false);
+    setApiError('');
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+      const raw = JSON.stringify({
+        mobile: mobile,
+        otp: enteredOtp
+      });
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow',
+      };
+      const response = await fetch(API_URL+'api/auth/verify-otp', requestOptions);
+      const result = await response.json();
+      if (result && (result.status === true || result.success === true)) {
+        setModalVisible(true);
+        setInvalid(false);
+        setApiError('');
+        console.log('otpverify',result)
+      } else {
+        setInvalid(false);
+        setApiError(result?.message || 'Invalid OTP. Please enter the correct OTP sent to your mobile.');
+        console.log('otpverify',result)
+      }
+    } catch (error) {
+      setInvalid(false);
+      setApiError(error.message || 'Network error. Please try again.');
+    }
   };
-
+ 
   const handleResend = () => {
     setTimer(60);
     setOtp(['', '', '', '']);
     setInvalid(false);
   };
-
+ 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
         <Text style={styles.backArrow}>{'\u2039'}</Text>
       </TouchableOpacity>
       <Text style={styles.header}>OTP Verification</Text>
-      <Text style={styles.enterOtp}>Enter OTP</Text>
+      <Text style={styles.enterOtp}>Enter OTP: {otp1}</Text>
       <Text style={styles.otpInfo}>An 4 digit OTP has been sent to{`\n`}{mobile}</Text>
+      {/* Show actual OTP received from backend for testing purposes */}
+      {typeof receivedOtp !== 'undefined' && receivedOtp && (
+        <Text style={[styles.otpInfo, { color: '#22C55E', fontWeight: 'bold', marginBottom: 8 }]}>OTP: {otp1}</Text>
+      )}
       <View style={styles.otpRow}>
         {otp.map((digit, idx) => (
           <TextInput
@@ -57,6 +94,9 @@ const OtpVerification = ({ mobile, onBack, navigation }) => {
           />
         ))}
       </View>
+      {apiError ? (
+        <Text style={styles.otpError}>{apiError}</Text>
+      ) : null}
       <View style={styles.otpRowBottom}>
         {timer > 0 ? (
           <Text style={styles.resendText}>
@@ -71,7 +111,7 @@ const OtpVerification = ({ mobile, onBack, navigation }) => {
       <TouchableOpacity style={[styles.verifyBtn, !isValid && styles.verifyBtnDisabled]} disabled={!isValid} onPress={handleVerify}>
         <Text style={[styles.verifyText, !isValid && styles.verifyTextDisabled]}>Verify</Text>
       </TouchableOpacity>
-
+ 
       {/* Success Modal */}
       <Modal
         visible={modalVisible}
@@ -111,7 +151,7 @@ const OtpVerification = ({ mobile, onBack, navigation }) => {
     </View>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
@@ -277,5 +317,5 @@ const styles = StyleSheet.create({
     color: '#BDBDBD',
   },
 });
-
+ 
 export default OtpVerification;
