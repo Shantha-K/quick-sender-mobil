@@ -7,10 +7,10 @@ const editImg = require('../../assets/Profile/Edit.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
 
 const EditProfile = ({route}) => {
-        const { _id } = route.params || {};
+  // const { _id } = route.params || {};
 
   const navigation = useNavigation();
-console.log('userid12',_id)
+// console.log('userid12',_id)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -18,9 +18,38 @@ console.log('userid12',_id)
   const [address, setAddress] = useState('');
 
   React.useEffect(() => {
-    // Replace with your actual user id or fetch from AsyncStorage if needed
-    const userId = _id;
-    console.log('userid',userId)
+    // Get userId from AsyncStorage instead of route params
+    React.useEffect(() => {
+      const getUserId = async () => {
+        try {
+          const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+          const userId = await AsyncStorage.getItem('userId');
+          console.log('userid from AsyncStorage', userId);
+          if (!userId) return;
+          const myHeaders = new Headers();
+          myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
+          const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+          };
+          fetch(API_URL + "api/auth/getregistered/" + userId, requestOptions)
+            .then((response) => response.json())
+            .then((result) => {
+              const data = result.data || {};
+              setName(data.name || '');
+              setEmail(data.email || '');
+              setPhone(data.mobile || '');
+              setDob(data.dob || '');
+              setAddress(data.address || '');
+              console.log('Profile fetched:', data);
+            });
+        } catch (e) {
+          console.error('Failed to get userId from AsyncStorage:', e);
+        }
+      };
+      getUserId();
+    }, []);
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
     const requestOptions = {
