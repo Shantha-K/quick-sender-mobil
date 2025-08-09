@@ -13,15 +13,24 @@ const Profile = ({ route }) => {
   const [name, setName] = useState(route?.params?.name || '');
   const [email, setEmail] = useState(route?.params?.email || '');
   const [profileImageUri, setProfileImageUri] = useState(null);
+  const [kycPending, setKycPending] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const uri = await AsyncStorage.getItem('profileImage');
         if (uri) setProfileImageUri(uri);
+        const kycStatus = await AsyncStorage.getItem('kycPending');
+        setKycPending(kycStatus === 'true');
       } catch (e) {}
     })();
-  }, []);
+    // Listen for navigation focus to update KYC status
+    const unsubscribe = navigation.addListener('focus', async () => {
+      const kycStatus = await AsyncStorage.getItem('kycPending');
+      setKycPending(kycStatus === 'true');
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -55,7 +64,11 @@ const Profile = ({ route }) => {
 
           
           <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
-          <MenuItem label="KYC Details" right={<Text style={styles.verify}>Verify</Text>} onPress={() => navigation.navigate('KycDetails')} />
+          <MenuItem
+            label="KYC Details"
+            right={kycPending ? <Text style={{ color: '#FFC107', fontWeight: '600', fontSize: 13 }}>Verification Pending</Text> : <Text style={styles.verify}>Verify</Text>}
+            onPress={() => navigation.navigate('KycDetails')}
+          />
           <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
           <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />
           <MenuItem label="Delivered Parcels" onPress={() => navigation.navigate('DeliveredParcels')} />
