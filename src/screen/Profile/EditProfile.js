@@ -19,56 +19,35 @@ const EditProfile = ({route}) => {
 
   React.useEffect(() => {
     // Get userId from AsyncStorage instead of route params
-    React.useEffect(() => {
-      const getUserId = async () => {
-        try {
-          const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-          const userId = await AsyncStorage.getItem('userId');
-          console.log('userid from AsyncStorage', userId);
-          if (!userId) return;
-          const myHeaders = new Headers();
-          myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
-          const requestOptions = {
-            method: "GET",
-            headers: myHeaders,
-            redirect: "follow"
-          };
-          fetch(API_URL + "api/auth/getregistered/" + userId, requestOptions)
-            .then((response) => response.json())
-            .then((result) => {
-              const data = result.data || {};
-              setName(data.name || '');
-              setEmail(data.email || '');
-              setPhone(data.mobile || '');
-              setDob(data.dob || '');
-              setAddress(data.address || '');
-              console.log('Profile fetched:', data);
-            });
-        } catch (e) {
-          console.error('Failed to get userId from AsyncStorage:', e);
-        }
-      };
-      getUserId();
-    }, []);
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
-    const requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow"
+    const getUserId = async () => {
+      try {
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+        const userId = await AsyncStorage.getItem('userId');
+        console.log('userid from AsyncStorage', userId);
+        if (!userId) return;
+        const myHeaders = new Headers();
+        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk1OTc4NDNlNDk4NGJkYmIzOTU3ZTIiLCJtb2JpbGUiOiIrOTE5Nzg3MDUzMDAwIiwiaWF0IjoxNzU0NjM0MTMyLCJleHAiOjE3NTUyMzg5MzJ9.3QI0G2pPrglS9e1Ax0uNGSHfL9Mad2x5iXgisG8rKpU");
+        const requestOptions = {
+          method: "GET",
+          headers: myHeaders,
+          redirect: "follow"
+        };
+        fetch(API_URL + "api/auth/getregistered/" + userId, requestOptions)
+          .then((response) => response.json())
+          .then((result) => {
+            const data = result.data || {};
+            setName(data.name || '');
+            setEmail(data.email || '');
+            setPhone(data.mobile || '');
+            setDob(data.dob || '');
+            setAddress(data.address || '');
+            console.log('Profile fetched:', data);
+          });
+      } catch (e) {
+        console.error('Failed to get userId from AsyncStorage:', e);
+      }
     };
-    fetch(API_URL + "api/auth/getregistered/" + userId, requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        const data = result.data || {};
-        setName(data.name || '');
-        setEmail(data.email || '');
-        setPhone(data.mobile || '');
-        setDob(data.dob || '');
-        setAddress(data.address || '');
-        console.log('Profile fetched:', data);
-      })
-      .catch((error) => console.error('Error fetching profile:', error));
+    getUserId();
   }, []);
 
   return (
