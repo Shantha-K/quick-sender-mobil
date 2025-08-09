@@ -34,6 +34,9 @@ import KycPending from '../screen/HomeDashBoard/KycPending';
 import SummaryScreen from '../screen/HomeDashBoard/SummaryScreen';
 //Home screen ends
 
+import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
+import TopUpWallet from '../screen/Wallet/TopUpWallet';
+
 const Stack = createStackNavigator();
 
 const AppRouter = () => (
@@ -72,6 +75,10 @@ const AppRouter = () => (
   <Stack.Screen name="KycPending" component={KycPending} />
   <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
       {/* Home screen ends */}
+
+  <Stack.Screen name="MyWalletScreen" component={MyWalletScreen} />
+  <Stack.Screen name="TopUpWallet" component={TopUpWallet} />
+
       
     </Stack.Navigator>
   </NavigationContainer>
