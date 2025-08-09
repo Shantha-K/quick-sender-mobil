@@ -1,15 +1,160 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, Alert, Modal } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL } from '../../service';
 const arrowImg = require('../../assets/Profile/Arrow.png');
 const dropdownImg = require('../../assets/Profile/Vector2.png');
 const cameraImg = require('../../assets/Profile/fcamra.png');
 
 const KycDetails = () => {
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
   const [idType, setIdType] = useState('');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const kycTypes = [
+    'Aadhar Card',
+    'Driving License',
+    'Voter ID',
+    'Passport',
+    'PAN Card',
+  ];
+  const [frontImage, setFrontImage] = useState(null);
+  const [backImage, setBackImage] = useState(null);
+
+  const handleCamera = (side) => {
+    launchCamera({ mediaType: 'photo', quality: 0.7 }, (response) => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Camera Error', response.errorMessage || 'Unknown error');
+        return;
+      }
+      if (response.assets && response.assets.length > 0) {
+        if (side === 'front') setFrontImage(response.assets[0]);
+        else setBackImage(response.assets[0]);
+      }
+    });
+  };
+
+  const handleGallery = (side) => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, (response) => {
+      if (response.didCancel) return;
+      if (response.errorCode) {
+        Alert.alert('Gallery Error', response.errorMessage || 'Unknown error');
+        return;
+      }
+      if (response.assets && response.assets.length > 0) {
+        if (side === 'front') setFrontImage(response.assets[0]);
+        else setBackImage(response.assets[0]);
+      }
+    });
+  };
+
+  const handleKycUpload = async () => {
+    if (!idType) {
+      Alert.alert('Please select KYC type');
+      return;
+    }
+    if (!frontImage || !backImage) {
+      Alert.alert('Please select both front and back images');
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      if (!token || !userId) {
+        setIsLoading(false);
+        Alert.alert('Error', 'User not authenticated. Please login again.');
+        return;
+      }
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${token}`);
+      const formdata = new FormData();
+      formdata.append("kycType", idType.toLowerCase().replace(/ /g, ''));
+      formdata.append("userId", userId);
+      formdata.append("kycFront", {
+        uri: frontImage.uri,
+        name: frontImage.fileName || 'front.jpg',
+        type: frontImage.type || 'image/jpeg',
+      });
+      formdata.append("kycBack", {
+        uri: backImage.uri,
+        name: backImage.fileName || 'back.jpg',
+        type: backImage.type || 'image/jpeg',
+      });
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+        redirect: "follow"
+      };
+      // Start timer for 2 seconds
+      const loadingTimeout = setTimeout(async () => {
+        setIsLoading(false);
+        setSuccessModalVisible(true);
+        await AsyncStorage.setItem('kycPending', 'true');
+      }, 2000);
+      // Await API but don't block UI
+      try {
+        const response = await fetch( API_URL+ "api/auth/kyc", requestOptions);
+        const result = await response.text();
+        console.log('KYC upload result:', result);
+      } catch (apiError) {
+        console.error('KYC upload error:', apiError);
+      }
+      // If API finishes before 2s, do nothing (modal will show after 2s)
+    } catch (error) {
+      setIsLoading(false);
+      console.error('KYC upload error:', error);
+      Alert.alert('KYC Upload Error', error.message || 'Unknown error');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Loading Overlay */}
+      <Modal
+        visible={isLoading}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 32, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>Uploading...</Text>
+          </View>
+        </View>
+      </Modal>
+      {/* Success Modal */}
+      <Modal
+        visible={successModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModalContainer}>
+            <View style={styles.successIconWrapper}>
+              <View style={styles.successIconCircle}>
+                <Text style={styles.successCheck}>✓</Text>
+              </View>
+            </View>
+            <Text style={styles.successTitle}>Your Kyc details uploaded successfully</Text>
+            <TouchableOpacity
+              style={styles.successDoneBtn}
+              onPress={async () => {
+                setSuccessModalVisible(false);
+                await AsyncStorage.setItem('kycPending', 'true');
+                navigation.goBack();
+              }}
+            >
+              <Text style={styles.successDoneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={arrowImg} style={styles.arrowIcon} />
@@ -18,25 +163,88 @@ const KycDetails = () => {
         <View style={{width: 24}} />
       </View>
       <View style={styles.form}>
-        <TouchableOpacity style={styles.dropdown} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.dropdown}
+          activeOpacity={0.7}
+          onPress={() => setDropdownVisible(!dropdownVisible)}
+        >
           <Text style={styles.dropdownText}>{idType ? idType : 'Select ID Proof Type'}</Text>
           <Image source={dropdownImg} style={styles.dropdownIcon} />
         </TouchableOpacity>
+        {dropdownVisible && (
+          <View style={{
+            borderWidth: 1.2,
+            borderColor: '#bbb',
+            borderRadius: 14,
+            backgroundColor: '#fff',
+            marginBottom: 16,
+            marginTop: -16,
+            zIndex: 10,
+            position: 'absolute',
+            left: 16,
+            right: 16,
+            top: 110,
+            elevation: 5,
+          }}>
+            {kycTypes.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' }}
+                onPress={() => {
+                  setIdType(type);
+                  setDropdownVisible(false);
+                }}
+              >
+                <Text style={{ fontSize: 16, color: '#222' }}>{type}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
         <Text style={styles.infoText}>
           Upload front & back side of your ID Proof.{"\n"}Supports : JPG, PNG, PDF.
         </Text>
         <View style={styles.uploadRow}>
-          <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7}>
-            <Image source={cameraImg} style={styles.cameraIcon} />
+          <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7} onPress={() => {
+            Alert.alert(
+              'Options',
+              '',
+              [
+                { text: 'Camera', onPress: () => handleCamera('front') },
+                { text: 'Gallery', onPress: () => handleGallery('front') },
+                { text: 'Cancel', style: 'cancel' },
+              ],
+              { cancelable: true }
+            );
+          }}>
+            {frontImage ? (
+              <Image source={{ uri: frontImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 12, resizeMode: 'cover' }} />
+            ) : (
+              <Image source={cameraImg} style={styles.cameraIcon} />
+            )}
             <Text style={styles.uploadLabel}>Front</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7}>
-            <Image source={cameraImg} style={styles.cameraIcon} />
+          <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7} onPress={() => {
+            Alert.alert(
+              'Options',
+              '',
+              [
+                { text: 'Camera', onPress: () => handleCamera('back') },
+                { text: 'Gallery', onPress: () => handleGallery('back') },
+                { text: 'Cancel', style: 'cancel' },
+              ],
+              { cancelable: true }
+            );
+          }}>
+            {backImage ? (
+              <Image source={{ uri: backImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 12, resizeMode: 'cover' }} />
+            ) : (
+              <Image source={cameraImg} style={styles.cameraIcon} />
+            )}
             <Text style={styles.uploadLabel}>Back</Text>
           </TouchableOpacity>
         </View>
       </View>
-      <TouchableOpacity style={styles.saveBtn}>
+      <TouchableOpacity style={styles.saveBtn} onPress={handleKycUpload}>
         <Text style={styles.saveText}>Save</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -44,6 +252,65 @@ const KycDetails = () => {
 };
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successModalContainer: {
+    width: 320,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  successIconWrapper: {
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#E6F9ED',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  successCheck: {
+    fontSize: 36,
+    color: '#19C37D',
+    fontWeight: 'bold',
+  },
+  successTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#222',
+    textAlign: 'center',
+    marginBottom: 28,
+    marginTop: 4,
+  },
+  successDoneBtn: {
+    backgroundColor: '#19C37D',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    width: '100%',
+  },
+  successDoneText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
