@@ -19,6 +19,7 @@ const SummaryScreen = ({ navigation }) => {
         const senderData = await AsyncStorage.getItem('senderData');
         const receiverData = await AsyncStorage.getItem('receiverData');
         const parcelData = await AsyncStorage.getItem('parcelData');
+        const profilePic = await AsyncStorage.getItem('profilePic');
         setSender(senderData ? JSON.parse(senderData) : {});
         setReceiver(receiverData ? JSON.parse(receiverData) : {});
         const parcelObj = parcelData ? JSON.parse(parcelData) : {};
@@ -37,12 +38,19 @@ const SummaryScreen = ({ navigation }) => {
     setApiLoading(true);
     setApiResult(null);
     try {
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setApiResult({ success: false, error: 'User not authenticated.' });
+        setApiLoading(false);
+        return;
+      }
       const myHeaders = new Headers();
       myHeaders.append('Content-Type', 'application/json');
-      myHeaders.append('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0NTEzNzNlNDk4NGJkYmIzOTM4MDYiLCJtb2JpbGUiOiIrOTE5ODc2NTQzMjEwIiwiaWF0IjoxNzU0NTYwOTU1LCJleHAiOjE3NTUxNjU3NTV9.x-hOWATDZmt2bthdWzAI0jz5Xp5Et6iUK7Zwf63tuW8');
+      myHeaders.append('Authorization', `Bearer ${token}`);
       const raw = JSON.stringify({ sender, receiver, parcel, payment });
       const requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
-      const response = await fetch(API_URL+'api/auth/delivery/request', requestOptions);
+      const response = await fetch(API_URL + 'api/auth/delivery/request', requestOptions);
       const result = await response.text();
       setApiResult({ success: true, result });
       console.log('API Result:', result);

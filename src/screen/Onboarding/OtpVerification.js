@@ -50,13 +50,31 @@ const OtpVerification = ({ navigation, route }) => {
       const response = await fetch(API_URL+'api/auth/verify-otp', requestOptions);
       const result = await response.json();
       if (result && (result.status === true || result.success === true)) {
+        // Save token to AsyncStorage if present
+        if (result.token) {
+          try {
+            const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+            await AsyncStorage.setItem('token', result.token);
+            // Save userId if present
+            if (result.data && result.data._id) {
+              await AsyncStorage.setItem('userId', result.data._id);
+            } else {
+              await AsyncStorage.removeItem('userId');
+            }
+          } catch (e) {
+            console.error('Failed to save token/userId to AsyncStorage:', e);
+          }
+        }
         setModalVisible(true);
         setInvalid(false);
         setApiError('');
 
-        const isExistingUser = result.data && (result.data.name || result.data.email || result.data.dob);
-        setUserExists(!!isExistingUser)
-        console.log('otpverify',result)
+  // Save navigation decision for Done button
+  const userData = result.data || {};
+  const hasProfile = userData.name || userData.email || userData.dob;
+  setUserExists(!!hasProfile);
+  // Navigation will now happen on Done button press
+  console.log('otpverify',result)
       } else {
         setInvalid(false);
         setApiError(result?.message || 'Invalid OTP. Please enter the correct OTP sent to your mobile.');
@@ -115,7 +133,7 @@ const OtpVerification = ({ navigation, route }) => {
       <TouchableOpacity style={[styles.verifyBtn, !isValid && styles.verifyBtnDisabled]} disabled={!isValid} onPress={handleVerify}>
         <Text style={[styles.verifyText, !isValid && styles.verifyTextDisabled]}>Verify</Text>
       </TouchableOpacity>
- 
+
       {/* Success Modal */}
       <Modal
         visible={modalVisible}
@@ -138,21 +156,14 @@ const OtpVerification = ({ navigation, route }) => {
             <Text style={styles.modalSubtitle}>OTP Verified successfully</Text>
             <Pressable
               style={styles.modalButton}
-              onPress={async () => {
+              onPress={() => {
                 setModalVisible(false);
-                try {
-                  const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-                  const userId = await AsyncStorage.getItem('userId');
-                  if (navigation) {
-                    if (userId) {
-                      navigation.replace('Home');
-                    } else {
-                      navigation.replace('RegisterAccount', { mobile });
-                    }
+                if (navigation) {
+                  if (userExists) {
+                    navigation.replace('Home');
+                  } else {
+                    navigation.replace('RegisterAccount', { mobile });
                   }
-                } catch (e) {
-                  // fallback: go to RegisterAccount if error
-                  if (navigation) navigation.replace('RegisterAccount', { mobile });
                 }
               }}
             >
