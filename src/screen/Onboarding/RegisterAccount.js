@@ -77,28 +77,41 @@ const [registeredUser, setRegisteredUser] = useState(null); // 🆕 add this at 
       const response = await fetch(API_URL+'api/auth/register', requestOptions);
       const result = await response.json();
       if (response.ok) {
-          setRegisteredUser(result.data); // 🆕 store user data
-          // Save userId from API response in AsyncStorage
-          const userId = result.data?._id;
+        setRegisteredUser(result.data); // 🆕 store user data
+        // Save userId and profileImage URI from API response in AsyncStorage
+        const userId = result.data?._id;
+        try {
+          const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
           if (userId) {
-            try {
-              const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-              await AsyncStorage.setItem('userId', userId);
-            } catch (e) {
-              console.error('Failed to save userId to AsyncStorage:', e);
-            }
+            await AsyncStorage.setItem('userId', userId);
           }
+          if (profileImage && profileImage.uri) {
+            await AsyncStorage.setItem('profileImage', profileImage.uri);
+          }
+          // Store name and email locally for global access
+          if (name) {
+            await AsyncStorage.setItem('name', name);
+          }
+          if (email) {
+            await AsyncStorage.setItem('email', email);
+          }
+        } catch (e) {
+          console.error('Failed to save userId or profileImage to AsyncStorage:', e);
+        }
         setModalVisible(true);
         console.log('Registration successful:', result, 'UserId:', userId);
       } else {
-        // If account already exists, navigate to Home
+        // If account already exists, navigate to Home and pass name/email
         if (result?.message && result.message.toLowerCase().includes('already')) {
+          // Use the entered name/email from state
+          const userName = name;
+          const userEmail = email;
           if (navigation && navigation.replace) {
-            navigation.replace('Home');
+            navigation.replace('Home', { name: userName, email: userEmail });
           } else if (navigation && navigation.navigate) {
-            navigation.navigate('Home');
+            navigation.navigate('Home', { name: userName, email: userEmail });
           } else if (navigation && navigation.reset) {
-            navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+            navigation.reset({ index: 0, routes: [{ name: 'Home', params: { name: userName, email: userEmail } }] });
           }
         } else {
           setError(result?.message || 'Registration failed');

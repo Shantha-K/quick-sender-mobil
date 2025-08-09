@@ -1,16 +1,28 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const profileImg = require('../../assets/Profile/Profile.png');
 const editImg = require('../../assets/Profile/Edit.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
 
 
-const Profile = ({route}) => {
+const Profile = ({ route }) => {
   const navigation = useNavigation();
-    const { name, email } = route.params || {};
+  const [name, setName] = useState(route?.params?.name || '');
+  const [email, setEmail] = useState(route?.params?.email || '');
+  const [profileImageUri, setProfileImageUri] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const uri = await AsyncStorage.getItem('profileImage');
+        if (uri) setProfileImageUri(uri);
+      } catch (e) {}
+    })();
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -26,14 +38,16 @@ const Profile = ({route}) => {
         {/* Profile Image and Edit */}
         <View style={styles.profileSection}>
           <View style={styles.profileImgWrapper}>
-            <Image source={profileImg} style={styles.profileImg} />
+            <Image
+              source={profileImageUri ? { uri: profileImageUri } : profileImg}
+              style={styles.profileImg}
+            />
             <TouchableOpacity style={styles.editBtn}>
               <Image source={editImg} style={styles.editIcon} />
             </TouchableOpacity>
           </View>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.email}>{email}</Text>
-          
         </View>
 
         {/* Menu List */}
@@ -49,7 +63,6 @@ const Profile = ({route}) => {
           <MenuItem label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
           <MenuItem label="Terms & Conditions" onPress={() => navigation.navigate('TermsConditions')} />
         </View>
-
         {/* Logout Button */}
       </View>
       <View style={styles.logoutWrapper}>
@@ -86,9 +99,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 24,
+    bottom: 32,
     paddingHorizontal: 24,
-    backgroundColor: 'transparent',
   },
   headerRow: {
     flexDirection: 'row',

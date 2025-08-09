@@ -28,11 +28,28 @@ const NAV_ITEMS = [
   },
 ];
 
-const Home = ({ navigation ,route}) => {
-    
-    const { name, email} = route.params || {};
-    console.log('name',name,email)
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const Home = ({ navigation, route }) => {
+  const [name, setName] = useState(route?.params?.name || '');
+  const [email, setEmail] = useState(route?.params?.email || '');
   const [activeTab, setActiveTab] = useState('parcels');
+
+  useEffect(() => {
+    // If name/email not in params, try to get from AsyncStorage
+    if (!name || !email) {
+      (async () => {
+        try {
+          const storedName = await AsyncStorage.getItem('name');
+          const storedEmail = await AsyncStorage.getItem('email');
+          if (storedName) setName(storedName);
+          if (storedEmail) setEmail(storedEmail);
+        } catch (e) {}
+      })();
+    }
+  }, []);
+
   useEffect(() => {
     if (route && route.params && route.params.tab) {
       setActiveTab(route.params.tab);
