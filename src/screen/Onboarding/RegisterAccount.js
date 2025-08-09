@@ -78,9 +78,18 @@ const [registeredUser, setRegisteredUser] = useState(null); // 🆕 add this at 
       const result = await response.json();
       if (response.ok) {
           setRegisteredUser(result.data); // 🆕 store user data
-
+          // Save userId from API response in AsyncStorage
+          const userId = result.data?._id;
+          if (userId) {
+            try {
+              const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+              await AsyncStorage.setItem('userId', userId);
+            } catch (e) {
+              console.error('Failed to save userId to AsyncStorage:', e);
+            }
+          }
         setModalVisible(true);
-        console.log('Registration successful:', result);
+        console.log('Registration successful:', result, 'UserId:', userId);
       } else {
         // If account already exists, navigate to Home
         if (result?.message && result.message.toLowerCase().includes('already')) {
@@ -107,16 +116,16 @@ const [registeredUser, setRegisteredUser] = useState(null); // 🆕 add this at 
  const handleDone = () => {
   setModalVisible(false);
 
-  const { name, email,_id } = registeredUser || {}; // ✅ pull from state
+  const { name, email } = registeredUser || {}; // ✅ pull from state
 
   if (navigation && navigation.replace) {
-    navigation.replace('Home', { name, email,_id });
+    navigation.replace('Home', { name, email});
   } else if (navigation && navigation.navigate) {
-    navigation.navigate('Home', { name, email,_id });
+    navigation.navigate('Home', { name, email });
   } else if (navigation && navigation.reset) {
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Home', params: { name, email,_id} }],
+      routes: [{ name: 'Home', params: { name, email} }],
     });
   }
 };

@@ -30,8 +30,8 @@ const NAV_ITEMS = [
 
 const Home = ({ navigation ,route}) => {
     
-    const { name, email ,_id} = route.params || {};
-    console.log('name',name,email,_id)
+    const { name, email} = route.params || {};
+    console.log('name',name,email)
   const [activeTab, setActiveTab] = useState('parcels');
   useEffect(() => {
     if (route && route.params && route.params.tab) {
@@ -47,7 +47,6 @@ const Home = ({ navigation ,route}) => {
     navigation={navigation}
     name={name}
     email={email}
-    _id={_id}  // Pass user ID to Parcels component
   />
 )}
 

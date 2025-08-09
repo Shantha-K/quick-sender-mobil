@@ -138,16 +138,22 @@ const OtpVerification = ({ navigation, route }) => {
             <Text style={styles.modalSubtitle}>OTP Verified successfully</Text>
             <Pressable
               style={styles.modalButton}
-              onPress={() => {
+              onPress={async () => {
                 setModalVisible(false);
-
-                if(navigation){
-                  if (userExists) {
-                    navigation.replace('Home');
-                }else{
-                  navigation.replace('RegisterAccount', { mobile });
+                try {
+                  const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+                  const userId = await AsyncStorage.getItem('userId');
+                  if (navigation) {
+                    if (userId) {
+                      navigation.replace('Home');
+                    } else {
+                      navigation.replace('RegisterAccount', { mobile });
+                    }
+                  }
+                } catch (e) {
+                  // fallback: go to RegisterAccount if error
+                  if (navigation) navigation.replace('RegisterAccount', { mobile });
                 }
-              }
               }}
             >
               <Text style={styles.modalButtonText}>Done</Text>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const Parcels = ({  name, email ,_id}) => {
+const Parcels = ({  name, email}) => {
 
   const navigation = useNavigation();
 
@@ -30,7 +30,7 @@ const Parcels = ({  name, email ,_id}) => {
             />
           </TouchableOpacity>
         </View>
-<TouchableOpacity onPress={() => navigation.navigate('Profile', { name, email,_id })}>
+<TouchableOpacity onPress={() => navigation.navigate('Profile', { name, email})}>
         <Image
           source={require('../../assets/DashBoard/profile.png')}
           style={styles.profileImg}
