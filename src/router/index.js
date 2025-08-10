@@ -1,3 +1,4 @@
+import RateCalculator from '../screen/Calculator/RateCalculator';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -78,6 +79,7 @@ const AppRouter = () => (
 
   <Stack.Screen name="MyWalletScreen" component={MyWalletScreen} />
   <Stack.Screen name="TopUpWallet" component={TopUpWallet} />
+  <Stack.Screen name="RateCalculator" component={RateCalculator} />
 
       
     </Stack.Navigator>

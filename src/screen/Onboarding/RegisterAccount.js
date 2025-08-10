@@ -368,6 +368,8 @@ const styles = StyleSheet.create({
   avatarImg: {
     width: 120,
     height: 120,
+    borderRadius: 60, // Make the image circular
+    overflow: 'hidden',
   },
   editBtn: {
     position: 'absolute',
@@ -457,8 +459,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalIconImg: {
-    width: 40,
-    height: 40,
+    width: 120,
+    height: 120,
   },
   modalTitle: {
     fontSize: 20,
