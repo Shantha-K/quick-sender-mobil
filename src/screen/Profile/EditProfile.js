@@ -46,14 +46,12 @@ const EditProfile = ({route}) => {
   };
 
   React.useEffect(() => {
-    // Get userId and token from AsyncStorage instead of route params
-    const getUserId = async () => {
+    const fetchProfile = async () => {
       try {
         const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-        const userId = await AsyncStorage.getItem('userId');
         const token = await AsyncStorage.getItem('token');
-        console.log('userid from AsyncStorage', userId);
-        if (!userId || !token) return;
+        const userId = await AsyncStorage.getItem('userId');
+        if (!token || !userId) return;
         const myHeaders = new Headers();
         myHeaders.append('Authorization', `Bearer ${token}`);
         const requestOptions = {
@@ -61,35 +59,30 @@ const EditProfile = ({route}) => {
           headers: myHeaders,
           redirect: 'follow',
         };
-        fetch(API_URL + 'api/auth/getregistered/' + userId, requestOptions)
-          .then((response) => response.json())
-          .then((result) => {
-            const data = result.data || {};
-            setName(data.name || '');
-            setEmail(data.email || '');
-            setPhone(data.mobile || '');
-            setDob(data.dob || '');
-            setAddress(data.address || '');
-            // Set profile image from API (handle relative path)
-            if (data.profileImage) {
-              let imageUrl = data.profileImage;
-              if (imageUrl && !imageUrl.startsWith('http')) {
-                // Remove trailing slash from API_URL if present
-                let baseUrl = API_URL;
-                if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
-                imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
-              }
-              setProfileImageUri(imageUrl);
-            } else {
-              setProfileImageUri(null);
-            }
-            console.log('Profile fetched:', data);
-          });
+        const response = await fetch(`${API_URL}api/auth/getregistered/${userId}`, requestOptions);
+        const result = await response.json();
+        const data = result.data || {};
+        setName(data.name || '');
+        setEmail(data.email || '');
+        setPhone(data.mobile || '');
+        setDob(data.dob || '');
+        setAddress(data.address || '');
+        if (data.profileImage) {
+          let imageUrl = data.profileImage;
+          if (imageUrl && !imageUrl.startsWith('http')) {
+            let baseUrl = API_URL;
+            if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+            imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
+          }
+          setProfileImageUri(imageUrl);
+        } else {
+          setProfileImageUri(null);
+        }
       } catch (e) {
-        console.error('Failed to get userId/token from AsyncStorage:', e);
+        setProfileImageUri(null);
       }
     };
-    getUserId();
+    fetchProfile();
   }, []);
 
   return (

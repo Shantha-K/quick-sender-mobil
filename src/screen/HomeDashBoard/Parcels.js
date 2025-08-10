@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../service';
 
 const Parcels = ({ name, email }) => {
   const navigation = useNavigation();
@@ -9,13 +10,39 @@ const Parcels = ({ name, email }) => {
   const [profileImageUri, setProfileImageUri] = useState(null);
 
   useEffect(() => {
-    const loadProfileImage = async () => {
+    const fetchProfile = async () => {
       try {
-        const uri = await AsyncStorage.getItem('profileImage');
-        if (uri) setProfileImageUri(uri);
-      } catch (e) {}
+        const token = await AsyncStorage.getItem('token');
+        const userId = await AsyncStorage.getItem('userId');
+        if (!token || !userId) return;
+        const myHeaders = new Headers();
+        myHeaders.append('Authorization', `Bearer ${token}`);
+        const requestOptions = {
+          method: 'GET',
+          headers: myHeaders,
+          redirect: 'follow',
+        };
+        const response = await fetch(`${API_URL}api/auth/getregistered/${userId}`, requestOptions);
+        const result = await response.json();
+        const data = result.data || {};
+        console.log('User data from API:', data); // Debug: log all user data fields
+        if (data.profileImage) {
+          let imageUrl = data.profileImage;
+          if (imageUrl && !imageUrl.startsWith('http')) {
+            let baseUrl = API_URL;
+            if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+            imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
+          }
+          setProfileImageUri(imageUrl);
+          console.log('Profile Image URL:', imageUrl); // Debug
+        } else {
+          setProfileImageUri(null);
+        }
+      } catch (e) {
+        setProfileImageUri(null);
+      }
     };
-    loadProfileImage();
+    fetchProfile();
   }, []);
 
   return (
@@ -38,7 +65,7 @@ const Parcels = ({ name, email }) => {
             />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile', { name, email })}>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile', { name, email, profileImageUri })}>
           <Image
             source={profileImageUri ? { uri: profileImageUri } : require('../../assets/DashBoard/profile.png')}
             style={styles.profileImg}
