@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Pressable, Image } from 'react-native';
 import { API_URL } from '../../service'; // Adjust the import based on your project structure
  
@@ -6,6 +6,7 @@ import { API_URL } from '../../service'; // Adjust the import based on your proj
 const OtpVerification = ({ navigation, route }) => {
   const { mobile, onBack, otp1 } = route?.params || {};
   const [otp, setOtp] = useState(['', '', '', '']);
+  const otpRefs = [useRef(), useRef(), useRef(), useRef()];
   const [timer, setTimer] = useState(60);
   const [invalid, setInvalid] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -25,6 +26,12 @@ const OtpVerification = ({ navigation, route }) => {
       newOtp[idx] = text;
       setOtp(newOtp);
       setInvalid(false);
+      if (text && idx < otpRefs.length - 1) {
+        otpRefs[idx + 1].current.focus();
+      }
+      if (!text && idx > 0) {
+        otpRefs[idx - 1].current.focus();
+      }
     }
   };
  
@@ -108,11 +115,18 @@ const OtpVerification = ({ navigation, route }) => {
         {otp.map((digit, idx) => (
           <TextInput
             key={idx}
+            ref={otpRefs[idx]}
             style={[styles.otpInput, invalid && styles.otpInputError]}
             keyboardType="number-pad"
             maxLength={1}
             value={digit}
             onChangeText={text => handleChange(text, idx)}
+            returnKeyType={idx === otp.length - 1 ? 'done' : 'next'}
+            onKeyPress={({ nativeEvent }) => {
+              if (nativeEvent.key === 'Backspace' && !digit && idx > 0) {
+                otpRefs[idx - 1].current.focus();
+              }
+            }}
           />
         ))}
       </View>
