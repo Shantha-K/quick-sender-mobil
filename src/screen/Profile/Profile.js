@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../service';
 
 const profileImg = require('../../assets/Profile/Profile.png');
 const editImg = require('../../assets/Profile/Edit.png');
@@ -13,22 +14,40 @@ const Profile = ({ route }) => {
   const [name, setName] = useState(route?.params?.name || '');
   const [email, setEmail] = useState(route?.params?.email || '');
   const [profileImageUri, setProfileImageUri] = useState(null);
-  const [kycPending, setKycPending] = useState(false);
-
+  const [kycStatus, setKycStatus] = useState(''); // Will hold the raw status string from API
+  // Debug log for kycStatus (after state declarations)
+  console.log('Rendering Profile, kycStatus:', kycStatus);
   useEffect(() => {
-    (async () => {
+    async function fetchKycStatus() {
       try {
         const uri = await AsyncStorage.getItem('profileImage');
         if (uri) setProfileImageUri(uri);
-        const kycStatus = await AsyncStorage.getItem('kycPending');
-        setKycPending(kycStatus === 'true');
-      } catch (e) {}
-    })();
-    // Listen for navigation focus to update KYC status
-    const unsubscribe = navigation.addListener('focus', async () => {
-      const kycStatus = await AsyncStorage.getItem('kycPending');
-      setKycPending(kycStatus === 'true');
-    });
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const myHeaders = new Headers();
+          myHeaders.append('Authorization', `Bearer ${token}`);
+          const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow',
+          };
+          const response = await fetch(API_URL+'api/auth/kyc-status', requestOptions);
+          const text = await response.text();
+          try {
+            const json = JSON.parse(text);
+            setKycStatus(json.kycStatus || '');
+            console.log('KYC status API (parsed JSON):', json);
+          } catch (parseErr) {
+            setKycStatus('');
+            console.error('KYC status API JSON parse error:', parseErr);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching profile data:', err);
+      }
+    }
+    fetchKycStatus();
+    const unsubscribe = navigation.addListener('focus', fetchKycStatus);
     return unsubscribe;
   }, [navigation]);
 
@@ -64,11 +83,23 @@ const Profile = ({ route }) => {
 
           
           <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
-          <MenuItem
-            label="KYC Details"
-            right={kycPending ? <Text style={{ color: '#FFC107', fontWeight: '600', fontSize: 13 }}>Verification Pending</Text> : <Text style={styles.verify}>Verify</Text>}
-            onPress={() => navigation.navigate('KycDetails')}
-          />
+            <MenuItem
+              label="KYC Details"
+              right={
+                <Text
+                  style={{
+                    color: kycStatus === 'pending' ? '#FFC107' : '#F26A6A',
+                    fontWeight: '600',
+                    fontSize: 13,
+                  }}
+                >
+                  {kycStatus && typeof kycStatus === 'string' && kycStatus.trim().length > 0
+                    ? kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1)
+                    : 'Verify'}
+                </Text>
+              }
+              onPress={() => navigation.navigate('KycDetails')}
+            />
           <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
           <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />
           <MenuItem label="Delivered Parcels" onPress={() => navigation.navigate('DeliveredParcels')} />
