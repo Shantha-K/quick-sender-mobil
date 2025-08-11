@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Pressable, Image, ActivityIndicator } from 'react-native';
 import { API_URL } from '../../service'; // Adjust the import based on your project structure
  
  
@@ -12,6 +12,7 @@ const OtpVerification = ({ navigation, route }) => {
   const [apiError, setApiError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [userExists, setUserExists] = useState(false);
+  const [loading, setLoading] = useState(false);
  
   React.useEffect(() => {
     if (timer > 0) {
@@ -41,6 +42,7 @@ const OtpVerification = ({ navigation, route }) => {
     const enteredOtp = otp.join('');
     setInvalid(false);
     setApiError('');
+    setLoading(true);
     try {
       const myHeaders = new Headers();
       myHeaders.append('Content-Type', 'application/json');
@@ -56,6 +58,7 @@ const OtpVerification = ({ navigation, route }) => {
       };
       const response = await fetch(API_URL+'api/auth/verify-otp', requestOptions);
       const result = await response.json();
+      setLoading(false);
       if (result && (result.status === true || result.success === true)) {
         // Save token to AsyncStorage if present
         if (result.token) {
@@ -88,6 +91,7 @@ const OtpVerification = ({ navigation, route }) => {
         console.log('otpverify',result)
       }
     } catch (error) {
+      setLoading(false);
       setInvalid(false);
       setApiError(error.message || 'Network error. Please try again.');
     }
@@ -186,6 +190,14 @@ const OtpVerification = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
+
+      {/* Spinner overlay */}
+      {loading && (
+        <View style={styles.spinnerOverlay}>
+          <ActivityIndicator size="60" color="#22C55E" />
+          <Text style={styles.loadingText}>Verifying OTP...</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -353,6 +365,23 @@ const styles = StyleSheet.create({
   },
   verifyTextDisabled: {
     color: '#BDBDBD',
+  },
+  spinnerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99,
+  },
+  loadingText: {
+    marginTop: 18,
+    fontSize: 18,
+    color: '#22C55E',
+    fontWeight: 'bold',
   },
 });
  
