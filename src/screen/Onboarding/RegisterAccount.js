@@ -53,8 +53,12 @@ const [registeredUser, setRegisteredUser] = useState(null); // 🆕 add this at 
     setLoading(true);
     setError('');
     try {
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const token = await AsyncStorage.getItem('token');
       const myHeaders = new Headers();
-      myHeaders.append('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODk0YTUxODc4OWQzYWU4ZThhZGUzNGIiLCJtb2JpbGUiOiI5MTk4NzY1NDMyMTEiLCJpYXQiOjE3NTQ2MzY4MjIsImV4cCI6MTc1NTI0MTYyMn0.H0sZDz3Ls7mhVY_QgiS7AQK0j3SURYKjMl-E0nY91W4');
+      if (token) {
+        myHeaders.append('Authorization', `Bearer ${token}`);
+      }
       const formdata = new FormData();
       formdata.append('name', name);
       formdata.append('email', email);
