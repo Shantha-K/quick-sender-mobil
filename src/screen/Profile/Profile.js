@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../service';
 
@@ -8,36 +8,36 @@ const profileImg = require('../../assets/Profile/Profile.png');
 const editImg = require('../../assets/Profile/Edit.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
 
-
 const Profile = ({ route }) => {
   const navigation = useNavigation();
   const [name, setName] = useState(route?.params?.name || '');
   const [email, setEmail] = useState(route?.params?.email || '');
   const [profileImageUri, setProfileImageUri] = useState(null);
-  const [kycStatus, setKycStatus] = useState(null); // Will hold the raw status string from API
-  // Debug log for kycStatus (after state declarations)
+  const [kycStatus, setKycStatus] = useState(null);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
   useEffect(() => {
     async function fetchKycStatus() {
       try {
         const token = await AsyncStorage.getItem('token');
         const userId = await AsyncStorage.getItem('userId');
         if (token && userId) {
-          // Fetch profile data from backend
           const myHeaders = new Headers();
           myHeaders.append('Authorization', `Bearer ${token}`);
-          const requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow',
-          };
+
+          const requestOptions = { method: 'GET', headers: myHeaders, redirect: 'follow' };
+
           const response = await fetch(`${API_URL}api/auth/getregistered/${userId}`, requestOptions);
           const result = await response.json();
           const data = result.data || {};
+
           setName(data.name || '');
           setEmail(data.email || '');
+
           if (data.profileImage) {
             let imageUrl = data.profileImage;
-            if (imageUrl && !imageUrl.startsWith('http')) {
+            if (!imageUrl.startsWith('http')) {
               let baseUrl = API_URL;
               if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
               imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
@@ -46,13 +46,13 @@ const Profile = ({ route }) => {
           } else {
             setProfileImageUri(null);
           }
-          // Fetch KYC status
-          const kycResponse = await fetch(API_URL+'api/auth/kyc-status', requestOptions);
+
+          const kycResponse = await fetch(API_URL + 'api/auth/kyc-status', requestOptions);
           const kycText = await kycResponse.text();
           try {
             const kycJson = JSON.parse(kycText);
             setKycStatus(kycJson.kycStatus || null);
-          } catch (parseErr) {
+          } catch {
             setKycStatus(null);
           }
         }
@@ -60,22 +60,51 @@ const Profile = ({ route }) => {
         console.error('Error fetching profile data:', err);
       }
     }
-    // Optimistically update KYC status if passed as param
+
     if (route?.params?.kycStatus) {
       setKycStatus(route.params.kycStatus);
       if (navigation.setParams) navigation.setParams({ kycStatus: undefined });
     } else {
-      setKycStatus(null); // Clear status before fetching
+      setKycStatus(null);
     }
+
     fetchKycStatus();
     const unsubscribe = navigation.addListener('focus', fetchKycStatus);
     return unsubscribe;
   }, [navigation, route?.params?.kycStatus]);
 
+  // Logout handler
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      if (token && userId) {
+        const myHeaders = new Headers();
+        myHeaders.append('Authorization', `Bearer ${token}`);
+        const requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          redirect: 'follow',
+        };
+        await fetch(`${API_URL}api/auth/logout/${userId}`, requestOptions);
+      }
+      await AsyncStorage.clear();
+      setLogoutModalVisible(false);
+      setLoggingOut(false);
+      navigation.reset({ index: 0, routes: [{ name: 'Splash' }] });
+    } catch (err) {
+      setLoggingOut(false);
+      setLogoutModalVisible(false);
+      // Optionally show error
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={styles.container}>
+      <View style={styles.container}>
+        {/* Scrollable content */}
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => {
@@ -88,7 +117,7 @@ const Profile = ({ route }) => {
               <Image source={arrowImg} style={styles.arrowIcon} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Profile</Text>
-            <View style={{width: 24}} />
+            <View style={{ width: 24 }} />
           </View>
 
           {/* Profile Image and Edit */}
@@ -135,14 +164,46 @@ const Profile = ({ route }) => {
             <MenuItem label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
             <MenuItem label="Terms & Conditions" onPress={() => navigation.navigate('TermsConditions')} />
           </View>
-          {/* Logout Button */}
-          <View style={styles.logoutWrapper}>
-            <TouchableOpacity style={styles.logoutBtn}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
+        </ScrollView>
+
+        {/* Logout Button - Fixed at bottom */}
+        <View style={styles.logoutWrapper}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={() => setLogoutModalVisible(true)}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+        <Modal
+          visible={logoutModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setLogoutModalVisible(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 24, width: 300, alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>Logout</Text>
+              <Text style={{ fontSize: 16, marginBottom: 24 }}>Do you want to logout from this device?</Text>
+              {loggingOut ? (
+                <ActivityIndicator size="small" color="#F26A6A" />
+              ) : (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, marginRight: 8, backgroundColor: '#F26A6A', borderRadius: 6, padding: 12, alignItems: 'center' }}
+                    onPress={handleLogout}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Yes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, marginLeft: 8, backgroundColor: '#eee', borderRadius: 6, padding: 12, alignItems: 'center' }}
+                    onPress={() => setLogoutModalVisible(false)}
+                  >
+                    <Text style={{ color: '#222', fontWeight: 'bold' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 };
@@ -155,7 +216,6 @@ const MenuItem = ({ label, right, onPress }) => (
     {right ? right : null}
   </View>
 );
-
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -248,11 +308,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: '#111',
     fontWeight: '500',
-  },
-  verify: {
-    color: '#F26A6A',
-    fontWeight: 'bold',
-    fontSize: 15,
   },
   logoutBtn: {
     backgroundColor: '#00C180',
