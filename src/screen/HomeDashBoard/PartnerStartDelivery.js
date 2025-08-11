@@ -49,7 +49,7 @@ const PartnerStartDelivery = ({ navigation }) => {
               <Text style={styles.kycDesc}>Start your earning working with us as a delivery partner</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.startBtn} onPress={() => {}}>
+          <TouchableOpacity style={styles.startBtn} onPress={() => navigation && navigation.navigate('DeliveryParcels')}>
             <Text style={styles.startBtnText}>Start Delivery</Text>
           </TouchableOpacity>
         </View>

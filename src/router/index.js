@@ -35,6 +35,9 @@ import KycPending from '../screen/HomeDashBoard/KycPending';
 import SummaryScreen from '../screen/HomeDashBoard/SummaryScreen';
 import PartnerStartDelivery from '../screen/HomeDashBoard/PartnerStartDelivery';
 import Partner from '../screen/HomeDashBoard/Partner';
+import DeliveryParcels from '../screen/StartDelivery/DeliveryParcels';
+import ParcelDetails from '../screen/StartDelivery/ParcelDetails';
+import ParcelMapView from '../screen/StartDelivery/ParcelMapView';
 //Home screen ends
 
 import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
@@ -78,6 +81,9 @@ const AppRouter = () => (
   <Stack.Screen name="KycPending" component={KycPending} />
   <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
   <Stack.Screen name="PartnerStartDelivery" component={PartnerStartDelivery} />
+  <Stack.Screen name="DeliveryParcels" component={DeliveryParcels} />
+  <Stack.Screen name="ParcelDetails" component={ParcelDetails} />
+  <Stack.Screen name="ParcelMapView" component={ParcelMapView} />
   <Stack.Screen name="Partner" component={Partner} />
       {/* Home screen ends */}
 
