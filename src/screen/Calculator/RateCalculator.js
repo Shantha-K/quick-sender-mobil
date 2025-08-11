@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Image, Alert } from 'react-native';
 import CustomDropdown from '../../components/CustomDropdown';
 import HomeNavBar from '../../components/HomeNavBar';
+import { API_URL } from '../../service';
 
 const RateCalculator = ({ navigation }) => {
   const [tab, setTab] = useState('Domestic');
@@ -20,6 +21,40 @@ const RateCalculator = ({ navigation }) => {
   const countryOptions = ['India', 'USA', 'UK', 'Canada', 'Australia'];
   const cityOptions = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata'];
 
+  const handleCalculate = async () => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+      const raw = JSON.stringify({
+        type: tab.toLowerCase(),
+        country: form.country,
+        fromCity: form.fromCity,
+        toCity: form.toCity,
+        parcelWeight: Number(form.weight),
+        parcelLength: Number(form.length),
+        parcelWidth: Number(form.width),
+        parcelHeight: Number(form.height),
+      });
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow',
+      };
+      const response = await fetch(API_URL+'api/auth/calculate-rate', requestOptions);
+      const result = await response.json();
+      if (result && result.rate) {
+        setRate(result.rate);
+      } else {
+        setRate('N/A');
+      }
+      setModalVisible(true);
+    } catch (error) {
+      setRate('N/A');
+      setModalVisible(true);
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.container}>
@@ -28,13 +63,19 @@ const RateCalculator = ({ navigation }) => {
         <View style={styles.tabRow}>
           <TouchableOpacity
             style={[styles.tabBtn, tab === 'Domestic' && styles.tabBtnActive]}
-            onPress={() => setTab('Domestic')}
+            onPress={() => {
+              setTab('Domestic');
+              setForm({ country: '', fromCity: '', toCity: '', weight: '', length: '', width: '', height: '' });
+            }}
           >
             <Text style={[styles.tabText, tab === 'Domestic' && styles.tabTextActive]}>Domestic</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tabBtn, tab === 'International' && styles.tabBtnActive]}
-            onPress={() => setTab('International')}
+            onPress={() => {
+              setTab('International');
+              setForm({ country: '', fromCity: '', toCity: '', weight: '', length: '', width: '', height: '' });
+            }}
           >
             <Text style={[styles.tabText, tab === 'International' && styles.tabTextActive]}>International</Text>
           </TouchableOpacity>
@@ -47,25 +88,13 @@ const RateCalculator = ({ navigation }) => {
             onSelect={v => setForm(f => ({ ...f, country: v }))}
             placeholder="Select Country"
           />
-          <CustomDropdown
-            label="From City"
-            value={form.fromCity}
-            options={cityOptions}
-            onSelect={v => setForm(f => ({ ...f, fromCity: v }))}
-            placeholder="From City"
-          />
-          <CustomDropdown
-            label="To City"
-            value={form.toCity}
-            options={cityOptions}
-            onSelect={v => setForm(f => ({ ...f, toCity: v }))}
-            placeholder="To City"
-          />
+          <TextInput style={styles.inputDropdown} placeholder="From City" placeholderTextColor="#B0B0B0" value={form.fromCity} onChangeText={v => setForm(f => ({ ...f, fromCity: v }))} />
+          <TextInput style={styles.inputDropdown} placeholder="To City" placeholderTextColor="#B0B0B0" value={form.toCity} onChangeText={v => setForm(f => ({ ...f, toCity: v }))} />
           <TextInput style={styles.inputDropdown} placeholder="Parcel Weight (kg)" placeholderTextColor="#B0B0B0" keyboardType="numeric" value={form.weight} onChangeText={v => setForm(f => ({ ...f, weight: v }))} />
           <TextInput style={styles.inputDropdown} placeholder="Parcel Length (cm)" placeholderTextColor="#B0B0B0" keyboardType="numeric" value={form.length} onChangeText={v => setForm(f => ({ ...f, length: v }))} />
           <TextInput style={styles.inputDropdown} placeholder="Parcel Width (cm)" placeholderTextColor="#B0B0B0" keyboardType="numeric" value={form.width} onChangeText={v => setForm(f => ({ ...f, width: v }))} />
           <TextInput style={styles.inputDropdown} placeholder="Parcel Height (cm)" placeholderTextColor="#B0B0B0" keyboardType="numeric" value={form.height} onChangeText={v => setForm(f => ({ ...f, height: v }))} />
-          <TouchableOpacity style={styles.calcBtn} onPress={() => setModalVisible(true)}>
+          <TouchableOpacity style={styles.calcBtn} onPress={handleCalculate}>
             <Text style={styles.calcBtnText}>Calculate</Text>
           </TouchableOpacity>
         </View>
