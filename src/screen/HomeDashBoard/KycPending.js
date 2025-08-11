@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import HomeNavBar from '../../components/HomeNavBar';
 
 const NAV_ITEMS = [
   {
@@ -34,95 +35,66 @@ const KycPending = ({ navigation }) => {
     calculator: { screen: 'Home', tab: 'calculator' },
   };
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Delivery partner</Text>
-      <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
-      {/* KYC Pending Card */}
-      <View style={styles.kycCard}>
-        <View style={styles.kycRow}>
-          <View style={styles.kycIconWrapper}>
-            <Image source={require('../../assets/Partner/card.png')} style={styles.kycIcon} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.kycTitle}>KYC Pending</Text>
-            <Text style={styles.kycDesc}>Waiting to verify your KYC Details</Text>
-          </View>
-        </View>
-        {/* Progress Bar */}
-        <View style={styles.progressBarBg}>
-          <View style={styles.progressBarFill} />
-        </View>
-      </View>
-      {/* Steps */}
-      <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
-      <View style={styles.stepsWrapper}>
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 1</Text>
-            <Text style={styles.stepLabel}>Complete KYC</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 2</Text>
-            <Text style={styles.stepLabel}>Receive orders</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 3</Text>
-            <Text style={styles.stepLabel}>Deliver Orders</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 4</Text>
-            <Text style={styles.stepLabel}>Earn money</Text>
-          </View>
-        </View>
-      </View>
-      {/* Bottom Navbar */}
-      <View style={styles.navbarWrapper}>
-        <View style={styles.navbar}>
-          {NAV_ITEMS.map(item => (
-            <View style={styles.navItem} key={item.key}>
-              <TouchableOpacity
-                style={styles.iconCircle}
-                activeOpacity={0.7}
-                onPress={() => {
-                  if (item.key !== activeTab && navigation && tabToScreen[item.key]) {
-                    const navTarget = tabToScreen[item.key];
-                    if (navTarget.screen === 'Home') {
-                      navigation.navigate('Home', { tab: navTarget.tab });
-                    } else {
-                      navigation.navigate(navTarget.screen);
-                    }
-                  }
-                }}
-              >
-                <Image
-                  source={item.img}
-                  style={styles.iconImg}
-                  tintColor={activeTab === item.key ? '#222' : '#bdbdbd'}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.label, activeTab === item.key && styles.activeLabel]}>{item.label}</Text>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Delivery partner</Text>
+        <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
+        {/* KYC Pending Card */}
+        <View style={styles.kycCard}>
+          <View style={styles.kycRow}>
+            <View style={styles.kycIconWrapper}>
+              <Image source={require('../../assets/Partner/card.png')} style={styles.kycIcon} />
             </View>
-          ))}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.kycTitle}>KYC Pending</Text>
+              <Text style={styles.kycDesc}>Waiting to verify your KYC Details</Text>
+            </View>
+          </View>
+          {/* Progress Bar */}
+          <View style={styles.progressBarBg}>
+            <View style={styles.progressBarFill} />
+          </View>
         </View>
-        <View style={styles.navbarLine} />
+        {/* Steps */}
+        <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
+        <View style={styles.stepsWrapper}>
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 1</Text>
+              <Text style={styles.stepLabel}>Complete KYC</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 2</Text>
+              <Text style={styles.stepLabel}>Receive orders</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 3</Text>
+              <Text style={styles.stepLabel}>Deliver Orders</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 4</Text>
+              <Text style={styles.stepLabel}>Earn money</Text>
+            </View>
+          </View>
+        </View>
       </View>
+      <HomeNavBar navigation={navigation} activeTab="partner" />
     </View>
   );
 };
-// ...existing code...
 
 const styles = StyleSheet.create({
   container: {
@@ -200,66 +172,6 @@ const styles = StyleSheet.create({
     width: '35%',
     backgroundColor: '#22C55E',
     borderRadius: 3,
-  },
-  navbarWrapper: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#fff',
-    paddingBottom: 12,
-    paddingTop: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 24,
-    backgroundColor: '#fff',
-    height: 55,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  iconImg: {
-    width: 28,
-    height: 28,
-    resizeMode: 'contain',
-  },
-  label: {
-    fontSize: 14,
-    color: '#bdbdbd',
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  activeLabel: {
-    color: '#222',
-    fontWeight: 'bold',
-  },
-  navbarLine: {
-    marginTop: 8,
-    marginHorizontal: '10%',
-    height: 6,
-    backgroundColor: '#222',
-    borderRadius: 3,
-    alignSelf: 'center',
   },
   stepsTitle: {
     fontSize: 15,

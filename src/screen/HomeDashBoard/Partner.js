@@ -1,64 +1,67 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import HomeNavBar from '../../components/HomeNavBar';
 
 const Partner = ({ navigation }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Delivery partner</Text>
-      <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Delivery partner</Text>
+        <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
 
-      {/* KYC Pending Card */}
-      <View style={styles.kycCard}>
-        <View style={styles.kycRow}>
-          <View style={styles.kycIconWrapper}>
-            <Image source={require('../../assets/Partner/card.png')} style={styles.kycIcon} />
+        {/* KYC Pending Card */}
+        <View style={styles.kycCard}>
+          <View style={styles.kycRow}>
+            <View style={styles.kycIconWrapper}>
+              <Image source={require('../../assets/Partner/card.png')} style={styles.kycIcon} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.kycTitle}>KYC Pending</Text>
+              <Text style={styles.kycDesc}>Complete KYC to Deliver the parcels & earn money</Text>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.kycTitle}>KYC Pending</Text>
-            <Text style={styles.kycDesc}>Complete KYC to Deliver the parcels & earn money</Text>
-          </View>
+          <TouchableOpacity style={styles.kycBtn} onPress={() => navigation && navigation.navigate('KycDetails')}>
+            <Text style={styles.kycBtnText}>Complete KYC</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.kycBtn} onPress={() => navigation && navigation.navigate('KycDetails')}>
-          <Text style={styles.kycBtnText}>Complete KYC</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Steps */}
-      <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
-      <View style={styles.stepsWrapper}>
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 1</Text>
-            <Text style={styles.stepLabel}>Complete KYC</Text>
+        {/* Steps */}
+        <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
+        <View style={styles.stepsWrapper}>
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 1</Text>
+              <Text style={styles.stepLabel}>Complete KYC</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 2</Text>
-            <Text style={styles.stepLabel}>Receive orders</Text>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 2</Text>
+              <Text style={styles.stepLabel}>Receive orders</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 3</Text>
-            <Text style={styles.stepLabel}>Deliver Orders</Text>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 3</Text>
+              <Text style={styles.stepLabel}>Deliver Orders</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 4</Text>
-            <Text style={styles.stepLabel}>Earn money</Text>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 4</Text>
+              <Text style={styles.stepLabel}>Earn money</Text>
+            </View>
           </View>
         </View>
       </View>
+      <HomeNavBar navigation={navigation} activeTab="partner" />
     </View>
   );
 };
