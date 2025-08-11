@@ -163,7 +163,7 @@ const KycDetails = () => {
               onPress={async () => {
                 setSuccessModalVisible(false);
                 await AsyncStorage.setItem('kycPending', 'true');
-                navigation.goBack();
+                navigation.navigate('Profile', { refreshKyc: true, kycStatus: 'pending' });
               }}
             >
               <Text style={styles.successDoneText}>Done</Text>

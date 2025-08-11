@@ -14,7 +14,7 @@ const Profile = ({ route }) => {
   const [name, setName] = useState(route?.params?.name || '');
   const [email, setEmail] = useState(route?.params?.email || '');
   const [profileImageUri, setProfileImageUri] = useState(null);
-  const [kycStatus, setKycStatus] = useState(''); // Will hold the raw status string from API
+  const [kycStatus, setKycStatus] = useState(null); // Will hold the raw status string from API
   // Debug log for kycStatus (after state declarations)
   useEffect(() => {
     async function fetchKycStatus() {
@@ -51,19 +51,26 @@ const Profile = ({ route }) => {
           const kycText = await kycResponse.text();
           try {
             const kycJson = JSON.parse(kycText);
-            setKycStatus(kycJson.kycStatus || '');
+            setKycStatus(kycJson.kycStatus || null);
           } catch (parseErr) {
-            setKycStatus('');
+            setKycStatus(null);
           }
         }
       } catch (err) {
         console.error('Error fetching profile data:', err);
       }
     }
+    // Optimistically update KYC status if passed as param
+    if (route?.params?.kycStatus) {
+      setKycStatus(route.params.kycStatus);
+      if (navigation.setParams) navigation.setParams({ kycStatus: undefined });
+    } else {
+      setKycStatus(null); // Clear status before fetching
+    }
     fetchKycStatus();
     const unsubscribe = navigation.addListener('focus', fetchKycStatus);
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, route?.params?.kycStatus]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -106,17 +113,19 @@ const Profile = ({ route }) => {
             <MenuItem
               label="KYC Details"
               right={
-                <Text
-                  style={{
-                    color: kycStatus === 'pending' ? '#FFC107' : '#F26A6A',
-                    fontWeight: '600',
-                    fontSize: 13,
-                  }}
-                >
-                  {kycStatus && typeof kycStatus === 'string' && kycStatus.trim().length > 0
-                    ? kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1)
-                    : 'Verify'}
-                </Text>
+                kycStatus !== null ? (
+                  <Text
+                    style={{
+                      color: kycStatus === 'pending' ? '#FFC107' : '#F26A6A',
+                      fontWeight: '600',
+                      fontSize: 13,
+                    }}
+                  >
+                    {kycStatus && typeof kycStatus === 'string' && kycStatus.trim().length > 0
+                      ? kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1)
+                      : 'Verify'}
+                  </Text>
+                ) : null
               }
               onPress={() => navigation.navigate('KycDetails', { kycStatus })}
             />
