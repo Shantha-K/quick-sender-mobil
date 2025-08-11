@@ -33,6 +33,8 @@ import ReceiverForm from '../screen/HomeDashBoard/ReceiverForm';
 import ParcelCategoryForm from '../screen/HomeDashBoard/ParcelCategoryForm';
 import KycPending from '../screen/HomeDashBoard/KycPending';
 import SummaryScreen from '../screen/HomeDashBoard/SummaryScreen';
+import PartnerStartDelivery from '../screen/HomeDashBoard/PartnerStartDelivery';
+import Partner from '../screen/HomeDashBoard/Partner';
 //Home screen ends
 
 import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
@@ -75,6 +77,8 @@ const AppRouter = () => (
   <Stack.Screen name="ParcelCategoryForm" component={ParcelCategoryForm} />
   <Stack.Screen name="KycPending" component={KycPending} />
   <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
+  <Stack.Screen name="PartnerStartDelivery" component={PartnerStartDelivery} />
+  <Stack.Screen name="Partner" component={Partner} />
       {/* Home screen ends */}
 
   <Stack.Screen name="MyWalletScreen" component={MyWalletScreen} />

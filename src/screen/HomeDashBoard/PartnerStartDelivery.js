@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import HomeNavBar from '../../components/HomeNavBar';
 
 const NAV_ITEMS = [
   {
@@ -33,90 +34,62 @@ const PartnerStartDelivery = ({ navigation }) => {
     calculator: { screen: 'Home', tab: 'calculator' },
   };
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Delivery partner</Text>
-      <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
-      {/* Delivery Parcel Card */}
-      <View style={styles.kycCard}>
-        <View style={styles.kycRow}>
-          <View style={styles.kycIconWrapper}>
-            <Image source={require('../../assets/DashBoard/BigBox.png')} style={styles.kycIcon} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.kycTitle}>Deliver Parcel</Text>
-            <Text style={styles.kycDesc}>Start your earning working with us as a delivery partner</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.startBtn} onPress={() => {}}>
-          <Text style={styles.startBtnText}>Start Delivery</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Steps */}
-      <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
-      <View style={styles.stepsWrapper}>
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 1</Text>
-            <Text style={styles.stepLabel}>Complete KYC</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 2</Text>
-            <Text style={styles.stepLabel}>Receive orders</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 3</Text>
-            <Text style={styles.stepLabel}>Deliver Orders</Text>
-          </View>
-        </View>
-        <View style={styles.stepLine} />
-        <View style={styles.stepItem}>
-          <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
-          <View style={styles.stepTextWrapper}>
-            <Text style={styles.stepNum}>Step 4</Text>
-            <Text style={styles.stepLabel}>Earn money</Text>
-          </View>
-        </View>
-      </View>
-      {/* Bottom Navbar */}
-      <View style={styles.navbarWrapper}>
-        <View style={styles.navbar}>
-          {NAV_ITEMS.map(item => (
-            <View style={styles.navItem} key={item.key}>
-              <TouchableOpacity
-                style={styles.iconCircle}
-                activeOpacity={0.7}
-                onPress={() => {
-                  if (item.key !== activeTab && navigation && tabToScreen[item.key]) {
-                    const navTarget = tabToScreen[item.key];
-                    if (navTarget.screen === 'Home') {
-                      navigation.navigate('Home', { tab: navTarget.tab });
-                    } else {
-                      navigation.navigate(navTarget.screen);
-                    }
-                  }
-                }}
-              >
-                <Image
-                  source={item.img}
-                  style={styles.iconImg}
-                  tintColor={activeTab === item.key ? '#222' : '#bdbdbd'}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.label, activeTab === item.key && styles.activeLabel]}>{item.label}</Text>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Delivery partner</Text>
+        <Text style={styles.subtitle}>Just a few steps to complete and then you can start earning with dotpixel</Text>
+        {/* Delivery Parcel Card */}
+        <View style={styles.kycCard}>
+          <View style={styles.kycRow}>
+            <View style={styles.kycIconWrapper}>
+              <Image source={require('../../assets/DashBoard/BigBox.png')} style={styles.kycIcon} />
             </View>
-          ))}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.kycTitle}>Deliver Parcel</Text>
+              <Text style={styles.kycDesc}>Start your earning working with us as a delivery partner</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.startBtn} onPress={() => {}}>
+            <Text style={styles.startBtnText}>Start Delivery</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.navbarLine} />
+        {/* Steps */}
+        <Text style={styles.stepsTitle}>Steps to work as a delivery partner</Text>
+        <View style={styles.stepsWrapper}>
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/accDetails.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 1</Text>
+              <Text style={styles.stepLabel}>Complete KYC</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Sendparcels.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 2</Text>
+              <Text style={styles.stepLabel}>Receive orders</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Sender/Icon.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 3</Text>
+              <Text style={styles.stepLabel}>Deliver Orders</Text>
+            </View>
+          </View>
+          <View style={styles.stepLine} />
+          <View style={styles.stepItem}>
+            <Image source={require('../../assets/Partner/wallet.png')} style={styles.stepIcon} />
+            <View style={styles.stepTextWrapper}>
+              <Text style={styles.stepNum}>Step 4</Text>
+              <Text style={styles.stepLabel}>Earn money</Text>
+            </View>
+          </View>
+        </View>
       </View>
+      <HomeNavBar navigation={navigation} activeTab="partner" />
     </View>
   );
 };
@@ -158,14 +131,20 @@ const styles = StyleSheet.create({
   kycRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   kycIconWrapper: {
-    marginRight: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFF7E6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
   kycIcon: {
-    width: 44,
-    height: 44,
+    width: 32,
+    height: 32,
     resizeMode: 'contain',
   },
   kycTitle: {
@@ -195,31 +174,35 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 12,
+    marginBottom: 16,
     marginLeft: 4,
   },
   stepsWrapper: {
-    marginBottom: 32,
-    marginLeft: 4,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
+    marginBottom: 24,
   },
   stepItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 0,
-    position: 'relative',
   },
   stepIcon: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
+    marginRight: 16,
     resizeMode: 'contain',
-    marginRight: 12,
+    tintColor: '#BDBDBD',
   },
   stepTextWrapper: {
     flex: 1,
   },
   stepNum: {
     fontSize: 13,
-    color: '#F26A6A',
+    color: '#F87171',
     fontWeight: 'bold',
     marginBottom: 2,
   },
@@ -227,76 +210,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
     fontWeight: '500',
+    marginBottom: 12,
   },
   stepLine: {
-    position: 'absolute',
-    left: 34,
-    top: 36,
-    height: 32,
-    width: 2,
-    backgroundColor: '#eee',
+    height: 24,
+    borderLeftWidth: 2,
+    borderColor: '#E0E0E0',
+    marginLeft: 15,
     marginBottom: 0,
-    zIndex: -1,
-  },
-  navbarWrapper: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#fff',
-    paddingBottom: 12,
-    paddingTop: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 24,
-    backgroundColor: '#fff',
-    height: 55,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  iconImg: {
-    width: 28,
-    height: 28,
-    resizeMode: 'contain',
-  },
-  label: {
-    fontSize: 14,
-    color: '#bdbdbd',
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  activeLabel: {
-    color: '#222',
-    fontWeight: 'bold',
-  },
-  navbarLine: {
-    marginTop: 8,
-    marginHorizontal: '10%',
-    height: 6,
-    backgroundColor: '#222',
-    borderRadius: 3,
-    alignSelf: 'center',
   },
 });
 
