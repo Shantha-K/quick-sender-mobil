@@ -160,7 +160,7 @@ const Profile = ({ route }) => {
             <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
             <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />
             <MenuItem label="Delivered Parcels" onPress={() => navigation.navigate('DeliveredParcels')} />
-            <MenuItem label="My Wallet" onPress={() => navigation.navigate('MyWallet')} />
+            <MenuItem label="My Wallet" onPress={() => navigation.navigate('MyWalletScreen')} />
             <MenuItem label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
             <MenuItem label="Terms & Conditions" onPress={() => navigation.navigate('TermsConditions')} />
           </View>
