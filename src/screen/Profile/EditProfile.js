@@ -20,6 +20,7 @@ const EditProfile = ({route}) => {
   const [dob, setDob] = useState('');
   const [address, setAddress] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const [profileImageUri, setProfileImageUri] = useState(null);
 
   // Open gallery to pick new profile image
@@ -39,6 +40,7 @@ const EditProfile = ({route}) => {
         }
         if (response.assets && response.assets.length > 0) {
           const img = response.assets[0];
+          setProfileImage(img); // store full image object
           setProfileImageUri(img.uri);
         }
       }
@@ -154,14 +156,22 @@ const EditProfile = ({route}) => {
               }
               const myHeaders = new Headers();
               myHeaders.append('Authorization', `Bearer ${token}`);
+              // Do NOT set Content-Type for FormData uploads
+              // myHeaders.append('Content-Type', 'multipart/form-data');
               const formdata = new FormData();
               formdata.append('name', name);
               formdata.append('email', email);
               formdata.append('mobile', phone);
               formdata.append('dob', dob);
               formdata.append('address', address);
-              // If you have a profileImage, append it here (uncomment and set profileImage state if needed)
-              // if (profileImage) formdata.append('profileImage', profileImage);
+              // If you have a profileImage, append it here
+              if (profileImage && profileImage.uri) {
+                formdata.append('profileImage', {
+                  uri: profileImage.uri,
+                  type: profileImage.type || 'image/jpeg',
+                  name: profileImage.fileName || 'profile.jpg',
+                });
+              }
               const requestOptions = {
                 method: 'PUT',
                 headers: myHeaders,
@@ -180,6 +190,38 @@ const EditProfile = ({route}) => {
                 return;
               }
               if (result && (result.status === true || result.success === true)) {
+                // Re-fetch profile data to update image and fields
+                const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+                const token = await AsyncStorage.getItem('token');
+                const userId = await AsyncStorage.getItem('userId');
+                if (token && userId) {
+                  const myHeaders = new Headers();
+                  myHeaders.append('Authorization', `Bearer ${token}`);
+                  const requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow',
+                  };
+                  const response = await fetch(`${API_URL}api/auth/getregistered/${userId}`, requestOptions);
+                  const result = await response.json();
+                  const data = result.data || {};
+                  setName(data.name || '');
+                  setEmail(data.email || '');
+                  setPhone(data.mobile || '');
+                  setDob(data.dob || '');
+                  setAddress(data.address || '');
+                  if (data.profileImage) {
+                    let imageUrl = data.profileImage;
+                    if (imageUrl && !imageUrl.startsWith('http')) {
+                      let baseUrl = API_URL;
+                      if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+                      imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
+                    }
+                    setProfileImageUri(imageUrl);
+                  } else {
+                    setProfileImageUri(null);
+                  }
+                }
                 setModalVisible(true);
               } else {
                 alert(result?.message || 'Failed to update profile.');
@@ -217,7 +259,10 @@ const EditProfile = ({route}) => {
               style={styles.modalButton}
               onPress={() => {
                 setModalVisible(false);
-                navigation.navigate('Profile');
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Profile' }],
+                });
               }}
             >
               <Text style={styles.modalButtonText}>Done</Text>
