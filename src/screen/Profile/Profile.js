@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../service';
 
@@ -74,42 +74,41 @@ const Profile = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            } else {
-              navigation.navigate('Home');
-            }
-          }}>
-            <Image source={arrowImg} style={styles.arrowIcon} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <View style={{width: 24}} />
-        </View>
-
-        {/* Profile Image and Edit */}
-        <View style={styles.profileSection}>
-          <View style={styles.profileImgWrapper}>
-            <Image
-              source={profileImageUri ? { uri: profileImageUri } : profileImg}
-              style={styles.profileImg}
-            />
-            <TouchableOpacity style={styles.editBtn}>
-              <Image source={editImg} style={styles.editIcon} />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => {
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              } else {
+                navigation.navigate('Home');
+              }
+            }}>
+              <Image source={arrowImg} style={styles.arrowIcon} />
             </TouchableOpacity>
+            <Text style={styles.headerTitle}>Profile</Text>
+            <View style={{width: 24}} />
           </View>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.email}>{email}</Text>
-        </View>
 
-        {/* Menu List */}
-        <View style={styles.menuList}>
+          {/* Profile Image and Edit */}
+          <View style={styles.profileSection}>
+            <View style={styles.profileImgWrapper}>
+              <Image
+                source={profileImageUri ? { uri: profileImageUri } : profileImg}
+                style={styles.profileImg}
+              />
+              <TouchableOpacity style={styles.editBtn}>
+                <Image source={editImg} style={styles.editIcon} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.email}>{email}</Text>
+          </View>
 
-          
-          <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
+          {/* Menu List */}
+          <View style={styles.menuList}>
+            <MenuItem label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
             <MenuItem
               label="KYC Details"
               right={
@@ -129,20 +128,21 @@ const Profile = ({ route }) => {
               }
               onPress={() => navigation.navigate('KycDetails', { kycStatus })}
             />
-          <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
-          <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />
-          <MenuItem label="Delivered Parcels" onPress={() => navigation.navigate('DeliveredParcels')} />
-          <MenuItem label="My Wallet" onPress={() => navigation.navigate('MyWallet')} />
-          <MenuItem label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
-          <MenuItem label="Terms & Conditions" onPress={() => navigation.navigate('TermsConditions')} />
+            <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
+            <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />
+            <MenuItem label="Delivered Parcels" onPress={() => navigation.navigate('DeliveredParcels')} />
+            <MenuItem label="My Wallet" onPress={() => navigation.navigate('MyWallet')} />
+            <MenuItem label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
+            <MenuItem label="Terms & Conditions" onPress={() => navigation.navigate('TermsConditions')} />
+          </View>
+          {/* Logout Button */}
+          <View style={styles.logoutWrapper}>
+            <TouchableOpacity style={styles.logoutBtn}>
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        {/* Logout Button */}
-      </View>
-      <View style={styles.logoutWrapper}>
-        <TouchableOpacity style={styles.logoutBtn}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
