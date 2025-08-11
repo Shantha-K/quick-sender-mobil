@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, Alert, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { API_URL } from '../../service';
 const arrowImg = require('../../assets/Profile/Arrow.png');
 const dropdownImg = require('../../assets/Profile/Vector2.png');
@@ -11,7 +11,23 @@ const cameraImg = require('../../assets/Profile/fcamra.png');
 const KycDetails = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [alreadyUploadedModal, setAlreadyUploadedModal] = useState(false);
+  const [alreadyUploadedMsg, setAlreadyUploadedMsg] = useState('');
   const navigation = useNavigation();
+  const route = useRoute();
+  // Show modal if kycStatus is 'pending' (or any status you want)
+  React.useEffect(() => {
+    if (route.params && route.params.kycStatus) {
+      const status = route.params.kycStatus.toLowerCase();
+      if (status === 'pending') {
+        setAlreadyUploadedMsg('Your KYC details already uploaded');
+        setAlreadyUploadedModal(true);
+      } else if (status === 'verified') {
+        setAlreadyUploadedMsg('Your KYC details already verified');
+        setAlreadyUploadedModal(true);
+      }
+    }
+  }, [route.params]);
   const [idType, setIdType] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const kycTypes = [
@@ -100,7 +116,7 @@ const KycDetails = () => {
       // Await API but don't block UI
       try {
         const response = await fetch( API_URL+ "api/auth/kyc", requestOptions);
-        const result = await response.text();
+        const result = await response.json();
         console.log('KYC upload result:', result);
       } catch (apiError) {
         console.error('KYC upload error:', apiError);
@@ -151,6 +167,28 @@ const KycDetails = () => {
               }}
             >
               <Text style={styles.successDoneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Already Uploaded/Verified Modal */}
+      <Modal
+        visible={alreadyUploadedModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAlreadyUploadedModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModalContainer}>
+            <Text style={styles.successTitle}>{alreadyUploadedMsg}</Text>
+            <TouchableOpacity
+              style={styles.successDoneBtn}
+              onPress={() => {
+                setAlreadyUploadedModal(false);
+                navigation.goBack();
+              }}
+            >
+              <Text style={styles.successDoneText}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -217,11 +255,18 @@ const KycDetails = () => {
             );
           }}>
             {frontImage ? (
-              <Image source={{ uri: frontImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 12, resizeMode: 'cover' }} />
+              <>
+                <Image source={{ uri: frontImage.uri }} style={styles.uploadImg} />
+                <View style={styles.uploadLabelOverlay}>
+                  <Text style={styles.uploadLabel}>Front</Text>
+                </View>
+              </>
             ) : (
-              <Image source={cameraImg} style={styles.cameraIcon} />
+              <>
+                <Image source={cameraImg} style={styles.cameraIcon} />
+                <Text style={styles.uploadLabel}>Front</Text>
+              </>
             )}
-            <Text style={styles.uploadLabel}>Front</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7} onPress={() => {
             Alert.alert(
@@ -236,11 +281,18 @@ const KycDetails = () => {
             );
           }}>
             {backImage ? (
-              <Image source={{ uri: backImage.uri }} style={{ width: '100%', height: '100%', borderRadius: 12, resizeMode: 'cover' }} />
+              <>
+                <Image source={{ uri: backImage.uri }} style={styles.uploadImg} />
+                <View style={styles.uploadLabelOverlay}>
+                  <Text style={styles.uploadLabel}>Back</Text>
+                </View>
+              </>
             ) : (
-              <Image source={cameraImg} style={styles.cameraIcon} />
+              <>
+                <Image source={cameraImg} style={styles.cameraIcon} />
+                <Text style={styles.uploadLabel}>Back</Text>
+              </>
             )}
-            <Text style={styles.uploadLabel}>Back</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -391,6 +443,27 @@ const styles = StyleSheet.create({
     marginRight: 8,
     aspectRatio: 1.5,
     maxWidth: 180,
+    overflow: 'hidden',
+  },
+  uploadImg: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    resizeMode: 'cover',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  uploadLabelOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    paddingVertical: 6,
+    alignItems: 'center',
   },
   cameraIcon: {
     width: 32,
