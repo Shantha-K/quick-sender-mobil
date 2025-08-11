@@ -16,14 +16,13 @@ const Profile = ({ route }) => {
   const [profileImageUri, setProfileImageUri] = useState(null);
   const [kycStatus, setKycStatus] = useState(''); // Will hold the raw status string from API
   // Debug log for kycStatus (after state declarations)
-  console.log('Rendering Profile, kycStatus:', kycStatus);
   useEffect(() => {
     async function fetchKycStatus() {
       try {
-        const uri = await AsyncStorage.getItem('profileImage');
-        if (uri) setProfileImageUri(uri);
         const token = await AsyncStorage.getItem('token');
-        if (token) {
+        const userId = await AsyncStorage.getItem('userId');
+        if (token && userId) {
+          // Fetch profile data from backend
           const myHeaders = new Headers();
           myHeaders.append('Authorization', `Bearer ${token}`);
           const requestOptions = {
@@ -31,15 +30,30 @@ const Profile = ({ route }) => {
             headers: myHeaders,
             redirect: 'follow',
           };
-          const response = await fetch(API_URL+'api/auth/kyc-status', requestOptions);
-          const text = await response.text();
+          const response = await fetch(`${API_URL}api/auth/getregistered/${userId}`, requestOptions);
+          const result = await response.json();
+          const data = result.data || {};
+          setName(data.name || '');
+          setEmail(data.email || '');
+          if (data.profileImage) {
+            let imageUrl = data.profileImage;
+            if (imageUrl && !imageUrl.startsWith('http')) {
+              let baseUrl = API_URL;
+              if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+              imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
+            }
+            setProfileImageUri(imageUrl);
+          } else {
+            setProfileImageUri(null);
+          }
+          // Fetch KYC status
+          const kycResponse = await fetch(API_URL+'api/auth/kyc-status', requestOptions);
+          const kycText = await kycResponse.text();
           try {
-            const json = JSON.parse(text);
-            setKycStatus(json.kycStatus || '');
-            console.log('KYC status API (parsed JSON):', json);
+            const kycJson = JSON.parse(kycText);
+            setKycStatus(kycJson.kycStatus || '');
           } catch (parseErr) {
             setKycStatus('');
-            console.error('KYC status API JSON parse error:', parseErr);
           }
         }
       } catch (err) {
@@ -56,7 +70,13 @@ const Profile = ({ route }) => {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('Home');
+            }
+          }}>
             <Image source={arrowImg} style={styles.arrowIcon} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
@@ -98,7 +118,7 @@ const Profile = ({ route }) => {
                     : 'Verify'}
                 </Text>
               }
-              onPress={() => navigation.navigate('KycDetails')}
+              onPress={() => navigation.navigate('KycDetails', { kycStatus })}
             />
           <MenuItem label="Notifications" onPress={() => navigation.navigate('Notifications')} />
           <MenuItem label="Sent Parcels" onPress={() => navigation.navigate('SentParcels')} />

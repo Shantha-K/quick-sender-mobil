@@ -15,14 +15,10 @@ const CustomDropdown = ({ label, value, options, onSelect, placeholder }) => {
           <Text style={{ color: value ? '#222' : '#B0B0B0', fontSize: 16 }}>
             {value ? value : placeholder || label}
           </Text>
-          {/* Show image if available, else fallback to Unicode arrow */}
-          {(() => {
-            try {
-              return <Image source={require('../assets/icons/dropdown.png')} style={styles.dropdownIcon} />;
-            } catch (e) {
-              return <Text style={styles.dropdownArrowFallback}>▼</Text>;
-            }
-          })()}
+          <Image
+            source={require('../assets/DashBoard/Down.png')}
+            style={{ width: 16, height: 16, resizeMode: 'contain', tintColor: '#B0B0B0' }}
+          />
         </View>
       </TouchableOpacity>
       <Modal
@@ -59,10 +55,11 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#B0B0B0',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 14,
     backgroundColor: '#fff',
+    height: 44,
   },
   dropdownIcon: {
     width: 18,

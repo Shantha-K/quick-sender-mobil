@@ -27,7 +27,7 @@ const HomeNavBar = ({ navigation, activeTab = 'parcels' }) => {
         headers: myHeaders,
       };
       console.log('RequestOptions:', requestOptions);
-      const response = await fetch('http://13.126.81.242:3000/api/auth/kyc-status', requestOptions);
+      const response = await fetch(API_URL+'api/auth/kyc-status', requestOptions);
       const text = await response.text();
       console.log('Raw API response:', text);
       let result;
