@@ -46,8 +46,7 @@ const TopUpWallet = () => {
       const result = await response.json();
       if (result.success) {
         setModalVisible(true);
-        // Optionally update wallet balance in AsyncStorage
-        await AsyncStorage.setItem('walletBalance', (result.balance || (parseFloat(amount))).toString());
+        // Do not store wallet balance in AsyncStorage
       } else {
         setApiError(result.message || 'Top-up failed');
       }
