@@ -21,37 +21,7 @@ const ReceiverForm = ({ navigation }) => {
   const [receiverState, setReceiverState] = useState('');
   const [receiverCity, setReceiverCity] = useState('');
   const [receiverAddress, setReceiverAddress] = useState('');
-  const [showStateDropdown, setShowStateDropdown] = useState(false);
-  const [states, setStates] = useState([]);
-  const [loadingStates, setLoadingStates] = useState(false);
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    const fetchStates = async () => {
-      setLoadingStates(true);
-      try {
-        const response = await fetch(
-          'https://countriesnow.space/api/v0.1/countries/states',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ country: 'India' }),
-          },
-        );
-        const data = await response.json();
-        if (data && data.data && data.data.states) {
-          setStates(data.data.states.map(s => s.name));
-        } else {
-          setStates([]);
-        }
-      } catch (e) {
-        setStates([]);
-      } finally {
-        setLoadingStates(false);
-      }
-    };
-    fetchStates();
-  }, []);
 
   const handleNext = async () => {
     const newErrors = {};
@@ -175,60 +145,21 @@ const ReceiverForm = ({ navigation }) => {
 
           {/* Receiver State */}
           <View style={{ marginBottom: 10 }}>
-            <TouchableOpacity
-              style={styles.inputBox}
-              onPress={() => setShowStateDropdown(!showStateDropdown)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.dropdownRow}>
-                <Text
-                  style={[
-                    styles.input,
-                    { color: receiverState ? '#222' : '#bdbdbd' },
-                  ]}
-                >
-                  {receiverState || 'Receiver State'}
-                </Text>
-                <Image
-                  source={require('../../assets/Sender/Vector2.png')}
-                  style={styles.dropdownArrowImg}
-                />
-              </View>
-            </TouchableOpacity>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={styles.input}
+                placeholder="Receiver State"
+                placeholderTextColor="#bdbdbd"
+                value={receiverState}
+                onChangeText={text => {
+                  setReceiverState(text);
+                  if (errors.receiverState)
+                    setErrors(prev => ({ ...prev, receiverState: undefined }));
+                }}
+              />
+            </View>
             {errors.receiverState && (
               <Text style={styles.errorText}>{errors.receiverState}</Text>
-            )}
-            {showStateDropdown && (
-              <View style={styles.dropdownList}>
-                {loadingStates ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#00C37A"
-                    style={{ margin: 12 }}
-                  />
-                ) : states.length > 0 ? (
-                  states.map(state => (
-                    <TouchableOpacity
-                      key={state}
-                      onPress={() => {
-                        setReceiverState(state);
-                        setShowStateDropdown(false);
-                        if (errors.receiverState)
-                          setErrors(prev => ({
-                            ...prev,
-                            receiverState: undefined,
-                          }));
-                      }}
-                    >
-                      <Text style={styles.dropdownItem}>{state}</Text>
-                    </TouchableOpacity>
-                  ))
-                ) : (
-                  <Text style={{ padding: 16, color: '#bdbdbd' }}>
-                    No states found
-                  </Text>
-                )}
-              </View>
             )}
           </View>
 

@@ -21,37 +21,7 @@ const SenderForm = ({ navigation }) => {
   const [senderState, setSenderState] = useState('');
   const [senderCity, setSenderCity] = useState('');
   const [senderAddress, setSenderAddress] = useState('');
-  const [showStateDropdown, setShowStateDropdown] = useState(false);
-  const [states, setStates] = useState([]);
-  const [loadingStates, setLoadingStates] = useState(false);
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    const fetchStates = async () => {
-      setLoadingStates(true);
-      try {
-        const response = await fetch(
-          'https://countriesnow.space/api/v0.1/countries/states',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ country: 'India' }),
-          },
-        );
-        const data = await response.json();
-        if (data && data.data && data.data.states) {
-          setStates(data.data.states.map(s => s.name));
-        } else {
-          setStates([]);
-        }
-      } catch (e) {
-        setStates([]);
-      } finally {
-        setLoadingStates(false);
-      }
-    };
-    fetchStates();
-  }, []);
 
   const handleNext = async () => {
     const newErrors = {};
@@ -101,105 +71,6 @@ const SenderForm = ({ navigation }) => {
           <Text style={styles.header}>Send Parcel</Text>
           <View style={{ width: 32 }} />
         </View>
-
-        {/* <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="Sender Name"
-              placeholderTextColor="#bdbdbd"
-              value={senderName}
-              onChangeText={setSenderName}
-            />
-            {errors.senderName && <Text style={styles.errorText}>{errors.senderName}</Text>}
-          </View>
-
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="Sender Mobile Number"
-              placeholderTextColor="#bdbdbd"
-              keyboardType="phone-pad"
-              value={senderMobile}
-              onChangeText={setSenderMobile}
-            />
-            {errors.senderMobile && <Text style={styles.errorText}>{errors.senderMobile}</Text>}
-          </View>
-
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="Sender Email"
-              placeholderTextColor="#bdbdbd"
-              keyboardType="email-address"
-              value={senderEmail}
-              onChangeText={setSenderEmail}
-            />
-            {errors.senderEmail && <Text style={styles.errorText}>{errors.senderEmail}</Text>}
-          </View>
-
-          <TouchableOpacity
-            style={styles.inputBox}
-            onPress={() => setShowStateDropdown(!showStateDropdown)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.dropdownRow}>
-              <Text style={[styles.input, { color: senderState ? '#222' : '#bdbdbd' }]}>
-                {senderState || 'Sender State'}
-              </Text>
-              <Image source={require('../../assets/Sender/Vector2.png')} style={styles.dropdownArrowImg} />
-            </View>
-          </TouchableOpacity>
-          {errors.senderState && <Text style={styles.errorText}>{errors.senderState}</Text>}
-
-          {showStateDropdown && (
-            <View style={styles.dropdownList}>
-              {loadingStates ? (
-                <ActivityIndicator size="small" color="#00C37A" style={{ margin: 12 }} />
-              ) : states.length > 0 ? (
-                states.map(state => (
-                  <TouchableOpacity
-                    key={state}
-                    onPress={() => {
-                      setSenderState(state);
-                      setShowStateDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItem}>{state}</Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={{ padding: 16, color: '#bdbdbd' }}>No states found</Text>
-              )}
-            </View>
-          )}
-
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="Sender City"
-              placeholderTextColor="#bdbdbd"
-              value={senderCity}
-              onChangeText={setSenderCity}
-            />
-            {errors.senderCity && <Text style={styles.errorText}>{errors.senderCity}</Text>}
-          </View>
-
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="Sender Address"
-              placeholderTextColor="#bdbdbd"
-              value={senderAddress}
-              onChangeText={setSenderAddress}
-              multiline
-            />
-            {errors.senderAddress && <Text style={styles.errorText}>{errors.senderAddress}</Text>}
-          </View>
-        </ScrollView> */}
 
         <ScrollView
           contentContainerStyle={{
@@ -274,60 +145,21 @@ const SenderForm = ({ navigation }) => {
 
           {/* Sender State */}
           <View style={{ marginBottom: 10 }}>
-            <TouchableOpacity
-              style={styles.inputBox}
-              onPress={() => setShowStateDropdown(!showStateDropdown)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.dropdownRow}>
-                <Text
-                  style={[
-                    styles.input,
-                    { color: senderState ? '#222' : '#bdbdbd' },
-                  ]}
-                >
-                  {senderState || 'Sender State'}
-                </Text>
-                <Image
-                  source={require('../../assets/Sender/Vector2.png')}
-                  style={styles.dropdownArrowImg}
-                />
-              </View>
-            </TouchableOpacity>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={styles.input}
+                placeholder="Sender State"
+                placeholderTextColor="#bdbdbd"
+                value={senderState}
+                onChangeText={text => {
+                  setSenderState(text);
+                  if (errors.senderState)
+                    setErrors(prev => ({ ...prev, senderState: undefined }));
+                }}
+              />
+            </View>
             {errors.senderState && (
               <Text style={styles.errorText}>{errors.senderState}</Text>
-            )}
-            {showStateDropdown && (
-              <View style={styles.dropdownList}>
-                {loadingStates ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#00C37A"
-                    style={{ margin: 12 }}
-                  />
-                ) : states.length > 0 ? (
-                  states.map(state => (
-                    <TouchableOpacity
-                      key={state}
-                      onPress={() => {
-                        setSenderState(state);
-                        setShowStateDropdown(false);
-                        if (errors.senderState)
-                          setErrors(prev => ({
-                            ...prev,
-                            senderState: undefined,
-                          }));
-                      }}
-                    >
-                      <Text style={styles.dropdownItem}>{state}</Text>
-                    </TouchableOpacity>
-                  ))
-                ) : (
-                  <Text style={{ padding: 16, color: '#bdbdbd' }}>
-                    No states found
-                  </Text>
-                )}
-              </View>
             )}
           </View>
 
