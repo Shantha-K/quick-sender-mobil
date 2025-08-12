@@ -92,6 +92,7 @@ const Profile = ({ route }) => {
       await AsyncStorage.clear();
       setLogoutModalVisible(false);
       setLoggingOut(false);
+      console.log('Logged out successfully');
       navigation.reset({ index: 0, routes: [{ name: 'Splash' }] });
     } catch (err) {
       setLoggingOut(false);

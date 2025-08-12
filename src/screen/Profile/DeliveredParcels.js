@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const deliveryImg = require('../../assets/Profile/Delivery.png');
@@ -8,6 +8,46 @@ const arrowImg = require('../../assets/Profile/Arrow.png');
 const DeliveredParcels = () => {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Pending');
+
+  // Mock data for completed parcels
+  const completedParcels = [
+    {
+      id: '00359007738060313786',
+      price: 30,
+      sender: 'Harpreet',
+      receiver: 'Malvika',
+      weight: 35,
+      from: '1-10, Halmat apartments, BTM Layout, Bangalore, 561011',
+      to: '1-10, Halmat apartments, BTM Layout, Bangalore, 561012',
+      status: 'Parcel Delivered',
+      updated: '3 hours ago',
+    },
+    {
+      id: '00359007738060313786',
+      price: 30,
+      sender: 'Malvika',
+      receiver: 'Harpreet',
+      weight: 35,
+      from: '1-10, Halmat apartments, BTM Layout, Bangalore, 561011',
+      to: '1-10, Halmat apartments, BTM Layout, Bangalore, 561012',
+      status: 'Parcel Delivered',
+      updated: '3 hours ago',
+    },
+  ];
+
+  // Mock data for cancelled parcels
+  const cancelledParcels = [
+    {
+      id: '00359007738060313786',
+      price: 30,
+      sender: 'Gowtham',
+      weight: 35,
+      from: '1-10, Halmat apartments, BTM Layout, Bangalore, 561011',
+      to: '1-10, Halmat apartments, BTM Layout, Bangalore, 561012',
+      status: 'Parcel Rejected',
+      updated: '3 hours ago',
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -31,12 +71,65 @@ const DeliveredParcels = () => {
           </TouchableOpacity>
         ))}
       </View>
-    
-      <View style={styles.contentContainer}>
-        <Image source={deliveryImg} style={styles.illustration} />
-        <Text style={styles.noParcelsText}>No parcels found!</Text>
-      </View>
-      
+
+      {activeTab === 'Completed' ? (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24 }}>
+          {completedParcels.map((parcel, idx) => (
+            <View key={idx} style={styles.parcelCard}>
+              <View style={styles.parcelHeader}>
+                <Text style={styles.parcelId}>ID: {parcel.id}</Text>
+                <Text style={styles.parcelPrice}>${parcel.price}</Text>
+              </View>
+              <Text style={styles.parcelName}>{parcel.sender}</Text>
+              <Text style={styles.parcelWeight}>{parcel.weight} kg</Text>
+              <View style={styles.addressRow}>
+                <View style={styles.dotGreen} />
+                <Text style={styles.addressText}>{parcel.from}</Text>
+              </View>
+              <View style={styles.addressRow}>
+                <View style={styles.dotRed} />
+                <Text style={styles.addressText}>{parcel.to}</Text>
+              </View>
+              <Text style={styles.statusText}>{parcel.status}</Text>
+              <View style={styles.progressBarBg}>
+                <View style={styles.progressBarFill} />
+              </View>
+              <Text style={styles.lastUpdate}>Last update: {parcel.updated}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      ) : activeTab === 'Cancelled' ? (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24 }}>
+          {cancelledParcels.map((parcel, idx) => (
+            <View key={idx} style={styles.parcelCard}>
+              <View style={styles.parcelHeader}>
+                <Text style={styles.parcelId}>ID: {parcel.id}</Text>
+                <Text style={styles.parcelPrice}>${parcel.price}</Text>
+              </View>
+              <Text style={styles.parcelName}>{parcel.sender}</Text>
+              <Text style={styles.parcelWeight}>{parcel.weight} kg</Text>
+              <View style={styles.addressRow}>
+                <View style={styles.dotGreen} />
+                <Text style={styles.addressText}>{parcel.from}</Text>
+              </View>
+              <View style={styles.addressRow}>
+                <View style={styles.dotRed} />
+                <Text style={styles.addressText}>{parcel.to}</Text>
+              </View>
+              <Text style={styles.statusText}>{parcel.status}</Text>
+              <View style={styles.progressBarBg}>
+                <View style={styles.progressBarFillRed} />
+              </View>
+              <Text style={styles.lastUpdate}>Last update: {parcel.updated}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.contentContainer}>
+          <Image source={deliveryImg} style={styles.illustration} />
+          <Text style={styles.noParcelsText}>No parcels found!</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -108,6 +201,108 @@ const styles = StyleSheet.create({
     color: '#BDBDBD',
     fontSize: 15,
     textAlign: 'center',
+  },
+  parcelCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F5F5F5',
+  },
+  parcelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFA726',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    padding: 8,
+    marginHorizontal: -16,
+    marginTop: -16,
+    marginBottom: 8,
+  },
+  parcelId: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  parcelPrice: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  parcelName: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 8,
+    marginBottom: 2,
+    color: '#222',
+  },
+  parcelWeight: {
+    position: 'absolute',
+    right: 16,
+    top: 44,
+    color: '#00C180',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  dotGreen: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#00C180',
+    marginRight: 8,
+  },
+  dotRed: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#F26A6A',
+    marginRight: 8,
+  },
+  addressText: {
+    color: '#222',
+    fontSize: 13,
+  },
+  statusText: {
+    fontWeight: 'bold',
+    color: '#222',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  progressBarBg: {
+    height: 5,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 3,
+    marginBottom: 8,
+    marginTop: 2,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: 5,
+    backgroundColor: '#00C180',
+    width: '100%',
+  },
+  progressBarFillRed: {
+    height: 5,
+    backgroundColor: '#F26A6A',
+    width: '30%',
+  },
+  lastUpdate: {
+    color: '#BDBDBD',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 

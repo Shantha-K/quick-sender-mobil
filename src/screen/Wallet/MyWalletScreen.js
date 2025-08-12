@@ -111,7 +111,7 @@ const MyWalletScreen = () => {
         <TouchableOpacity style={styles.topUpBtn} onPress={() => navigation.navigate('TopUpWallet')}>
           <Text style={styles.topUpText}>Top - up wallet</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.withdrawBtn}>
+        <TouchableOpacity style={styles.withdrawBtn} onPress={() => navigation.navigate('WithDrawScreen')}>
           <Text style={styles.withdrawText}>Withdraw</Text>
         </TouchableOpacity>
       </View>
