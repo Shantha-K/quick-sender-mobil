@@ -42,6 +42,7 @@ import ParcelMapView from '../screen/StartDelivery/ParcelMapView';
 
 import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
 import TopUpWallet from '../screen/Wallet/TopUpWallet';
+import TransactionHistory from '../screen/Wallet/TransactionHistory';
 
 const Stack = createStackNavigator();
 
@@ -90,6 +91,7 @@ const AppRouter = () => (
   <Stack.Screen name="MyWalletScreen" component={MyWalletScreen} />
   <Stack.Screen name="TopUpWallet" component={TopUpWallet} />
   <Stack.Screen name="RateCalculator" component={RateCalculator} />
+  <Stack.Screen name="TransactionHistory" component={TransactionHistory} />
 
       
     </Stack.Navigator>

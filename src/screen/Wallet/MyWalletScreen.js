@@ -1,17 +1,66 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../service';
 
 const cardBg = require('../../assets/Profile/WalletCardBg.png'); // Optional: use a gradient or image for card background
 const emptyIcon = require('../../assets/Profile/empty.png'); // Optional: placeholder icon for empty state
 
 const MyWalletScreen = () => {
   const navigation = useNavigation();
-  // Demo data, replace with real data from API/state
-  const balance = 0.0;
-  const name = 'Jhon Smith';
-  const cardNumber = '**** **** **** 3629';
-  const hasTransactions = false;
+  const [balance, setBalance] = useState(0.0);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      setLoading(true);
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        let fetchedName = '';
+        if (!userId) return;
+        // Fetch user name
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const myHeaders = new Headers();
+          myHeaders.append('Authorization', `Bearer ${token}`);
+          const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow',
+          };
+          const response = await fetch(API_URL+`api/auth/getregistered/${userId}`, requestOptions);
+          const result = await response.json();
+          if (result.success && result.data && typeof result.data.name === 'string') {
+            fetchedName = result.data.name;
+          }
+        }
+        // Fetch wallet balance
+        const requestOptions2 = {
+          method: 'GET',
+          redirect: 'follow',
+        };
+        const response2 = await fetch(API_URL+`api/auth/wallet/${userId}`, requestOptions2);
+        const result2 = await response2.json();
+        if (result2.success) {
+          setBalance(result2.balance);
+          setTransactions(result2.transactions || []);
+        }
+        if (fetchedName) {
+          setUserName(fetchedName);
+        }
+      } catch (e) {
+        // handle error
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBalance();
+    const unsubscribe = navigation.addListener('focus', fetchBalance);
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -25,24 +74,37 @@ const MyWalletScreen = () => {
       </View>
 
       {/* Wallet Card */}
-      <View style={[styles.card, {backgroundColor: styles.topUpBtn.backgroundColor}]}> 
+      <View style={styles.card}>
         <Text style={styles.cardBalanceLabel}>My balance</Text>
-        <Text style={styles.cardBalance}>₹ {balance.toFixed(2)}</Text>
-        <Text style={styles.cardName}>{name}</Text>
-        <Text style={styles.cardNumber}>{cardNumber}</Text>
+        <Text style={styles.cardBalance}>₹ {loading ? '...' : balance.toFixed(2)}</Text>
+        <Text style={styles.cardName}>{userName ? userName : 'Loading...'}</Text>
+        <Text style={styles.cardNumber}>{'**** **** **** 3629'}</Text>
       </View>
 
       {/* Transaction History */}
       <View style={styles.historyHeader}>
         <Text style={styles.historyTitle}>Transaction History</Text>
-        <TouchableOpacity>
-          <Text style={styles.sellAll}>Sell All</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory', { transactions })}>
+          <Text style={styles.sellAll}>See All</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.emptyState}>
-        {/* <Image source={emptyIcon} style={styles.emptyIcon} /> */}
-        <Text style={styles.emptyText}>No Records Found</Text>
-      </View>
+      {loading ? (
+        <View style={styles.emptyState}><Text style={styles.emptyText}>Loading...</Text></View>
+      ) : transactions.length === 0 ? (
+        <View style={styles.emptyState}><Text style={styles.emptyText}>No Records Found</Text></View>
+      ) : (
+        <View style={{marginHorizontal:0, marginBottom:24}}>
+          {[...transactions].reverse().slice(0, 4).map((txn, idx) => (
+            <View key={idx} style={styles.txnCard}>
+              <View style={styles.txnCardRow}>
+                <Text style={styles.txnTitle}>{txn.type === 'topup' ? 'Top up successful' : 'Payment successful'}</Text>
+                <Text style={styles.txnTime}>{getTimeAgo(txn.date)}</Text>
+              </View>
+              <Text style={styles.txnDesc}>{txn.type === 'topup' ? `You successfully top-up your wallet for ₹${txn.amount}` : `Your parcel has been successfully booked ₹${txn.amount}`}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Bottom Buttons */}
       <View style={styles.buttonRow}>
@@ -56,6 +118,21 @@ const MyWalletScreen = () => {
     </View>
   );
 };
+
+// Add helper function for time ago
+function getTimeAgo(dateStr) {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay > 0) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+  if (diffHr > 0) return `${diffHr} hour${diffHr > 1 ? 's' : ''} ago`;
+  if (diffMin > 0) return `${diffMin} min${diffMin > 1 ? 's' : ''} ago`;
+  return 'Just now';
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -134,7 +211,8 @@ const styles = StyleSheet.create({
   },
   sellAll: {
     fontSize: 14,
-    color: '#B0B0B0',
+    color: '#00D084',
+    fontWeight: 'bold',
   },
   emptyState: {
     alignItems: 'center',
@@ -187,6 +265,40 @@ const styles = StyleSheet.create({
     color: '#222',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  txnCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    marginHorizontal: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
+  },
+  txnCardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  txnTitle: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#222',
+  },
+  txnTime: {
+    color: '#B0B0B0',
+    fontSize: 13,
+  },
+  txnDesc: {
+    color: '#222',
+    fontSize: 14,
+    marginTop: 2,
   },
 });
 
