@@ -28,11 +28,11 @@ import TermsConditions from '../screen/Profile/TermsConditions'
 
 //Home screen starts
 import Home from '../screen/HomeDashBoard/Home';
-import SenderForm from '../screen/HomeDashBoard/SenderForm';
-import ReceiverForm from '../screen/HomeDashBoard/ReceiverForm';
-import ParcelCategoryForm from '../screen/HomeDashBoard/ParcelCategoryForm';
+import SenderForm from '../screen/Send Parcel/SenderForm';
+import ReceiverForm from '../screen/Send Parcel/ReceiverForm';
+import ParcelCategoryForm from '../screen/Send Parcel/ParcelCategoryForm';
 import KycPending from '../screen/HomeDashBoard/KycPending';
-import SummaryScreen from '../screen/HomeDashBoard/SummaryScreen';
+import SummaryScreen from '../screen/Send Parcel/SummaryScreen';
 import PartnerStartDelivery from '../screen/HomeDashBoard/PartnerStartDelivery';
 import Partner from '../screen/HomeDashBoard/Partner';
 import DeliveryParcels from '../screen/StartDelivery/DeliveryParcels';

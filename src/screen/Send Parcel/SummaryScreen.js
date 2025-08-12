@@ -113,17 +113,21 @@ const SummaryScreen = ({ navigation }) => {
             <Text style={styles.cardTitle}>Parcel Estimated Amount</Text>
             <TouchableOpacity><Text style={styles.edit}>Edit</Text></TouchableOpacity>
           </View>
-          <Text>$ {estimatedAmount}</Text>
+          <Text>₹ {estimatedAmount}</Text>
         </View>
         {/* Payment */}
         <View style={[styles.card, { marginBottom: 20 }]}> 
           <Text style={styles.cardTitle}>Payment</Text>
           <Text>Payment Type : {payment.paymentType}</Text>
-          <Text>Delivery Fee : {payment.deliveryFee}</Text>
+          <Text>Delivery Fee : ₹{payment.deliveryFee ? payment.deliveryFee.replace(/[^\d.]/g, '') : ''}</Text>
         </View>
       </ScrollView>
       <TouchableOpacity style={styles.payBtn} onPress={handlePay} disabled={apiLoading}>
-        <Text style={styles.payBtnText}>{apiLoading ? 'Processing...' : `Pay $ ${payment.deliveryFee ? payment.deliveryFee.replace('$', '') : ''}`}</Text>
+        <Text style={styles.payBtnText}>{apiLoading ? 'Processing...' : `Pay ₹${(() => {
+          const fee = parseFloat(payment.deliveryFee?.replace(/[^\d.]/g, '') || 0);
+          const est = parseFloat(estimatedAmount || 0);
+          return (fee + est).toFixed(2);
+        })()}`}</Text>
       </TouchableOpacity>
       {apiResult && (
         <View style={{ marginTop: 16, alignItems: 'center' }}>

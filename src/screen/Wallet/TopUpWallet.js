@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Modal, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../service';
 
 const initialPaymentMethods = [
   { id: '1', label: 'Google Pay' },
@@ -17,6 +19,44 @@ const TopUpWallet = () => {
   const [showCard, setShowCard] = useState(false);
   const [cardNumber, setCardNumber] = useState('3629');
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  const handleTopUp = async () => {
+    setLoading(true);
+    setApiError('');
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      console.log('User ID:', userId); // Debug
+      if (!userId || !amount) {
+        setApiError('Please enter a valid amount.');
+        setLoading(false);
+        return;
+      }
+      const myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+      const raw = JSON.stringify({ userId, amount: parseFloat(amount) });
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow',
+      };
+      const response = await fetch(API_URL+'api/auth/wallet/topup', requestOptions);
+      const result = await response.json();
+      if (result.success) {
+        setModalVisible(true);
+        // Optionally update wallet balance in AsyncStorage
+        await AsyncStorage.setItem('walletBalance', (result.balance || (parseFloat(amount))).toString());
+      } else {
+        setApiError(result.message || 'Top-up failed');
+      }
+    } catch (error) {
+      setApiError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -33,7 +73,7 @@ const TopUpWallet = () => {
       <Text style={styles.label}>Enter the amount of Top - up</Text>
       <TextInput
         style={styles.input}
-        placeholder="$ 0.00"
+        placeholder="₹ 0.00"
         placeholderTextColor="#B0B0B0"
         keyboardType="numeric"
         value={amount}
@@ -95,9 +135,12 @@ const TopUpWallet = () => {
       />
 
       {/* Continue Button */}
-      <TouchableOpacity style={styles.continueBtn} onPress={() => setModalVisible(true)}>
-        <Text style={styles.continueText}>Continue</Text>
+      <TouchableOpacity style={styles.continueBtn} onPress={handleTopUp} disabled={loading}>
+        <Text style={styles.continueText}>{loading ? 'Processing...' : 'Continue'}</Text>
       </TouchableOpacity>
+      {apiError ? (
+        <Text style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{apiError}</Text>
+      ) : null}
 
       {/* Success Modal */}
       <Modal
@@ -116,7 +159,10 @@ const TopUpWallet = () => {
             </View>
             <Text style={styles.modalTitle}>Top-up Successful</Text>
             <Text style={styles.modalDesc}>The balance will be added to your wallet</Text>
-            <TouchableOpacity style={styles.modalBtn} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.modalBtn} onPress={() => {
+              setModalVisible(false);
+              navigation.goBack();
+            }}>
               <Text style={styles.modalBtnText}>Okay</Text>
             </TouchableOpacity>
           </View>

@@ -25,9 +25,9 @@ const MyWalletScreen = () => {
       </View>
 
       {/* Wallet Card */}
-      <View style={styles.card}>
+      <View style={[styles.card, {backgroundColor: styles.topUpBtn.backgroundColor}]}> 
         <Text style={styles.cardBalanceLabel}>My balance</Text>
-        <Text style={styles.cardBalance}>$ {balance.toFixed(2)}</Text>
+        <Text style={styles.cardBalance}>₹ {balance.toFixed(2)}</Text>
         <Text style={styles.cardName}>{name}</Text>
         <Text style={styles.cardNumber}>{cardNumber}</Text>
       </View>
@@ -86,8 +86,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    backgroundColor: 'linear-gradient(90deg, #00E09E 0%, #00B2FF 100%)', // fallback for now
-    backgroundColor: '#00E09E', // fallback for now
+    backgroundColor: '#00D084', // Use top-up button color
     borderRadius: 24,
     marginHorizontal: 24,
     padding: 24,
