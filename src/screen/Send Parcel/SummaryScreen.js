@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../service';
 
@@ -10,8 +10,8 @@ const SummaryScreen = ({ navigation }) => {
   const [parcel, setParcel] = useState({});
   const [payment, setPayment] = useState({ paymentType: 'Wallet', deliveryFee: '$30' });
   const [estimatedAmount, setEstimatedAmount] = useState('');
-  const [apiResult, setApiResult] = useState(null);
-  const [apiLoading, setApiLoading] = useState(false);
+  const [showLowBalanceModal, setShowLowBalanceModal] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,30 +34,65 @@ const SummaryScreen = ({ navigation }) => {
     fetchData();
   }, []);
 
-  const handlePay = async () => {
-    setApiLoading(true);
-    setApiResult(null);
+  const fetchWalletBalance = async () => {
     try {
-      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        setApiResult({ success: false, error: 'User not authenticated.' });
-        setApiLoading(false);
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        setWalletBalance(null);
+        return;
+      }
+      const response = await fetch(
+        API_URL+`api/auth/wallet/${userId}`,
+        { method: 'GET', redirect: 'follow' }
+      );
+      const result = await response.json();
+      setWalletBalance(parseFloat(result.balance || 0));
+    } catch (error) {
+      setWalletBalance(null);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchWalletBalance();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const handlePay = async () => {
+    const est = parseFloat(estimatedAmount || 0);
+    if (walletBalance === null) {
+      setShowLowBalanceModal(true);
+      return;
+    }
+    if (walletBalance < est) {
+      setShowLowBalanceModal(true);
+      return;
+    }
+    // Sufficient balance, send OTP
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        console.error('User ID not found in storage');
         return;
       }
       const myHeaders = new Headers();
       myHeaders.append('Content-Type', 'application/json');
-      myHeaders.append('Authorization', `Bearer ${token}`);
-      const raw = JSON.stringify({ sender, receiver, parcel, payment });
-      const requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
-      const response = await fetch(API_URL + 'api/auth/delivery/request', requestOptions);
-      const result = await response.text();
-      setApiResult({ success: true, result });
-      console.log('API Result:', result);
+      const raw = JSON.stringify({ userId });
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow',
+      };
+      const response = await fetch(API_URL+'api/auth/wallet/request-otp', requestOptions);
+      const result = await response.json();
+      console.log(result);
+      if (result && result.otp) {
+        navigation.navigate('SendParcelOtpVerification', { otp: result.otp, userId });
+      }
     } catch (error) {
-      setApiResult({ success: false, error: error.message });
-    } finally {
-      setApiLoading(false);
+      console.error(error);
     }
   };
 
@@ -122,20 +157,42 @@ const SummaryScreen = ({ navigation }) => {
           <Text>Delivery Fee : ₹{payment.deliveryFee ? payment.deliveryFee.replace(/[^\d.]/g, '') : ''}</Text>
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.payBtn} onPress={handlePay} disabled={apiLoading}>
-        <Text style={styles.payBtnText}>{apiLoading ? 'Processing...' : `Pay ₹${(() => {
-          const fee = parseFloat(payment.deliveryFee?.replace(/[^\d.]/g, '') || 0);
+      <TouchableOpacity style={styles.payBtn} onPress={handlePay} disabled={false}>
+        <Text style={styles.payBtnText}>{`Pay ₹${(() => {
           const est = parseFloat(estimatedAmount || 0);
-          return (fee + est).toFixed(2);
+          return est.toFixed(2);
         })()}`}</Text>
       </TouchableOpacity>
-      {apiResult && (
-        <View style={{ marginTop: 16, alignItems: 'center' }}>
-          <Text style={{ color: apiResult.success ? 'green' : 'red' }}>
-            {apiResult.success ? 'Request sent successfully!' : `Error: ${apiResult.error}`}
-          </Text>
+      {/* Low Balance Modal */}
+      <Modal
+        visible={showLowBalanceModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLowBalanceModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 24, alignItems: 'center', width: '85%' }}>
+            <View style={{ backgroundColor: '#E6FFF3', borderRadius: 100, padding: 8, marginBottom: 16 }}>
+              <View style={{ backgroundColor: '#00C97E', borderRadius: 100, padding: 14, alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={require('../../assets/Partner/wallet.png')} style={{ width: 38, height: 38 }} />
+              </View>
+            </View>
+            <Text style={{ fontWeight: 'bold', fontSize: 20, textAlign: 'center', marginBottom: 8 }}>Your wallet balance is very low</Text>
+            <Text style={{ color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 24 }}>
+              Add required money to your wallet in order to send parcel
+            </Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#00C97E', borderRadius: 8, paddingVertical: 12, paddingHorizontal: 32, width: '100%' }}
+              onPress={() => {
+                setShowLowBalanceModal(false);
+                navigation.navigate('MyWalletScreen');
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Add Money</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 };

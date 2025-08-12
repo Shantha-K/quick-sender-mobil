@@ -43,6 +43,7 @@ import ParcelMapView from '../screen/StartDelivery/ParcelMapView';
 import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
 import TopUpWallet from '../screen/Wallet/TopUpWallet';
 import TransactionHistory from '../screen/Wallet/TransactionHistory';
+import SendParcelOtpVerification from '../screen/Send Parcel/SendParcelOtpVerification';
 
 const Stack = createStackNavigator();
 
@@ -92,6 +93,7 @@ const AppRouter = () => (
   <Stack.Screen name="TopUpWallet" component={TopUpWallet} />
   <Stack.Screen name="RateCalculator" component={RateCalculator} />
   <Stack.Screen name="TransactionHistory" component={TransactionHistory} />
+  <Stack.Screen name="SendParcelOtpVerification" component={SendParcelOtpVerification} />
 
       
     </Stack.Navigator>
