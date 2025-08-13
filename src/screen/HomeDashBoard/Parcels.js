@@ -34,7 +34,6 @@ const Parcels = ({ name, email }) => {
             imageUrl = baseUrl + '/' + imageUrl.replace(/^\//, '');
           }
           setProfileImageUri(imageUrl);
-          console.log('Profile Image URL:', imageUrl); // Debug
         } else {
           setProfileImageUri(null);
         }

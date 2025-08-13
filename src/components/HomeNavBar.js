@@ -39,13 +39,10 @@ const HomeNavBar = ({ navigation, activeTab = 'parcels' }) => {
       }
       console.log('Parsed KYC API result:', result);
       if (result.kycStatus === 'verify') {
-        console.log('Navigating to Partner');
         navigation.replace('Partner');
       } else if (result.kycStatus === 'pending') {
-        console.log('Navigating to KycPending');
         navigation.replace('KycPending');
       } else if (result.kycStatus === 'verified') {
-        console.log('Navigating to PartnerStartDelivery');
         navigation.replace('PartnerStartDelivery');
       } else {
         console.log('Unknown kycStatus:', result.kycStatus);
@@ -58,7 +55,7 @@ const HomeNavBar = ({ navigation, activeTab = 'parcels' }) => {
   const tabToScreen = {
     parcels: { screen: 'Home', tab: 'parcels' },
     sender: { screen: 'Home', tab: 'sender' },
-    partner: { screen: 'Partner' }, // Will be handled by handlePartnerPress
+    partner: { screen: 'Partner' }, 
     calculator: { screen: 'Home', tab: 'calculator' },
   };
 
