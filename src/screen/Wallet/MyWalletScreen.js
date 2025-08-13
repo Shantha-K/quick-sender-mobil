@@ -4,9 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../service';
 
-const cardBg = require('../../assets/Profile/WalletCardBg.png'); // Optional: use a gradient or image for card background
-const emptyIcon = require('../../assets/Profile/empty.png'); // Optional: placeholder icon for empty state
-
 const MyWalletScreen = () => {
   const navigation = useNavigation();
   const [balance, setBalance] = useState(0.0);
@@ -74,11 +71,20 @@ const MyWalletScreen = () => {
       </View>
 
       {/* Wallet Card */}
-      <View style={styles.card}>
-        <Text style={styles.cardBalanceLabel}>My balance</Text>
-        <Text style={styles.cardBalance}>₹ {loading ? '...' : balance.toFixed(2)}</Text>
-        <Text style={styles.cardName}>{userName ? userName : 'Loading...'}</Text>
-        <Text style={styles.cardNumber}>{'**** **** **** 3629'}</Text>
+      <View style={[styles.card, {
+        alignItems: 'flex-start',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.18,
+        shadowRadius: 24,
+        elevation: 16,
+      }]}>
+        <View style={{alignSelf: 'stretch', alignItems: 'center'}}>
+          <Text style={[styles.cardBalanceLabel, {color: '#222', textAlign: 'center'}]}>My balance</Text>
+          <Text style={[styles.cardBalance, {color: '#222', textAlign: 'center'}]}>₹ {loading ? '...' : balance.toFixed(2)}</Text>
+        </View>
+        <Text style={[styles.cardName, {color: '#222', textAlign: 'left'}]}>{userName ? userName : 'Loading...'}</Text>
+        <Text style={[styles.cardNumber, {color: '#222', textAlign: 'left'}]}>{'**** **** **** 3629'}</Text>
       </View>
 
       {/* Transaction History */}
@@ -169,11 +175,11 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 24,
     alignItems: 'flex-start',
-    shadowColor: '#00E09E',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 16,
   },
   cardBalanceLabel: {
     color: '#fff',
