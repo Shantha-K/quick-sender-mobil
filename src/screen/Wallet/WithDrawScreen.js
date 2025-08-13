@@ -7,6 +7,7 @@ import { API_URL } from '../../service';
 const googlePayIcon = require('../../assets/Wallet/Gpay.png');
 const phonePayIcon = require('../../assets/Wallet/Phonepe.png');
 const arrowImg = require('../../assets/Profile/Arrow.png');
+const walletIcon = require('../../assets/Wallet/wallet.png');
 
 const paymentMethods = [
   { key: 'googlepay', label: 'Google Pay', icon: googlePayIcon },
@@ -192,8 +193,8 @@ const WithDrawScreen = () => {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 24, padding: 32, alignItems: 'center', width: 300 }}>
             <View style={{ backgroundColor: modalSuccess ? '#00C180' : '#F26A6A', borderRadius: 50, padding: 16, marginBottom: 16 }}>
-              {/* You can use a success/fail icon here, for now a box icon */}
-              <Text style={{ fontSize: 32, color: '#fff' }}>⬛</Text>
+              {/* Show success icon or insufficient.png for error */}
+              <Image source={walletIcon} style={{ width: 48, height: 48, resizeMode: 'contain' }} />
             </View>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#222', marginBottom: 8, textAlign: 'center' }}>{modalMessage}</Text>
             <Text style={{ color: '#BDBDBD', fontSize: 15, marginBottom: 24, textAlign: 'center' }}>
@@ -203,7 +204,13 @@ const WithDrawScreen = () => {
               style={{ backgroundColor: '#00C180', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 32, width: '100%' }}
               onPress={() => {
                 setModalVisible(false);
-                navigation.navigate('MyWalletScreen');
+                navigation.reset({
+                  index: 1,
+                  routes: [
+                    { name: 'Profile' },
+                    { name: 'MyWalletScreen' },
+                  ],
+                });
               }}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>Okay</Text>

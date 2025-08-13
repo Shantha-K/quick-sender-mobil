@@ -145,7 +145,12 @@ const Profile = ({ route }) => {
                 kycStatus !== null ? (
                   <Text
                     style={{
-                      color: kycStatus === 'pending' ? '#FFC107' : '#F26A6A',
+                      color:
+                        kycStatus === 'verified'
+                          ? '#19C37D'
+                          : kycStatus === 'pending'
+                          ? '#FFC107'
+                          : '#F26A6A',
                       fontWeight: '600',
                       fontSize: 13,
                     }}
