@@ -38,7 +38,6 @@ const Home = ({ navigation ,route}) => {
         setActiveTab(route.params.tab);
       }
     }, [route && route.params && route.params.tab]);
-    console.log('Rendering Home.js screen');
     return (
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
