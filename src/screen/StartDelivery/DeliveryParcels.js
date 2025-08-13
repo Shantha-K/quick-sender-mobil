@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { API_URL } from '../../service';
 
 const mockParcels = [
   {
@@ -50,12 +51,12 @@ const DeliveryParcels = ({ navigation }) => {
             >
               <View style={styles.cardHeader}>
                 <Text style={styles.cardId}>ID: {parcel.id}</Text>
-                <Text style={styles.cardPrice}>${parcel.price}</Text>
+                <Text style={styles.cardPrice}>₹{parcel.price}</Text>
               </View>
               <View style={styles.cardBody}>
                 <View style={styles.cardRow}>
                   <Text style={styles.cardName}>{parcel.name}</Text>
-                  <Text style={styles.cardWeight}>{parcel.weight} kg</Text>
+                  <Text style={styles.cardWeight}>{parcel.weight}</Text>
                 </View>
                 <View style={styles.cardRow}>
                   <View style={styles.dotGreen} />

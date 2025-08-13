@@ -36,8 +36,7 @@ import SummaryScreen from '../screen/Send Parcel/SummaryScreen';
 import PartnerStartDelivery from '../screen/HomeDashBoard/PartnerStartDelivery';
 import Partner from '../screen/HomeDashBoard/Partner';
 import DeliveryParcels from '../screen/StartDelivery/DeliveryParcels';
-import ParcelDetails from '../screen/StartDelivery/ParcelDetails';
-import ParcelMapView from '../screen/StartDelivery/ParcelMapView';
+import ParcelDetailsMapToggle from '../screen/StartDelivery/ParcelDetailsMapToggle';
 //Home screen ends
 
 import MyWalletScreen from '../screen/Wallet/MyWalletScreen'; // Importing MyWalletScreen
@@ -86,8 +85,8 @@ const AppRouter = () => (
   <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
   <Stack.Screen name="PartnerStartDelivery" component={PartnerStartDelivery} />
   <Stack.Screen name="DeliveryParcels" component={DeliveryParcels} />
-  <Stack.Screen name="ParcelDetails" component={ParcelDetails} />
-  <Stack.Screen name="ParcelMapView" component={ParcelMapView} />
+  <Stack.Screen name="ParcelDetails" component={ParcelDetailsMapToggle} />
+  {/* ParcelMapView is now merged into ParcelDetailsMapToggle */}
   <Stack.Screen name="Partner" component={Partner} />
       {/* Home screen ends */}
 

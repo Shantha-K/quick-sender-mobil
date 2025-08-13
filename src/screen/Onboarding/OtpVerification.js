@@ -65,6 +65,7 @@ const OtpVerification = ({ navigation, route }) => {
           try {
             const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
             await AsyncStorage.setItem('token', result.token);
+            console.log('Token saved successfully:', result.token);
             // Save userId if present
             if (result.data && result.data._id) {
               await AsyncStorage.setItem('userId', result.data._id);
