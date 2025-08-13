@@ -387,9 +387,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   editIcon: {
-    width: 16,
+    width: 28,
     height: 16,
-    tintColor: '#fff',
+    // tintColor: '#fff',
   },
   input: {
     borderWidth: 1,
